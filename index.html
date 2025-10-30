@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - E-Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts nếu cần -->
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-top">
+            <a href="index.html" class="logo">
+                <img src="images/logo_e_shop.png" alt="E-Shop Logo">
+            </a>
+            <div class="search-bar">
+                <input type="text" placeholder="Tìm kiếm sản phẩm...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="header-actions">
+                <a href="cart.html" class="action-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Giỏ hàng</span>
+                </a>
+                <a href="login_register.html" class="action-item">
+                    <i class="fas fa-user"></i>
+                    <span>Đăng nhập</span>
+                </a>
+                <!-- Có thể thêm nút "Đăng ký" riêng hoặc ẩn/hiện tùy trạng thái đăng nhập -->
+            </div>
+        </div>
+        <nav class="main-nav">
+            <ul class="main-nav-list">
+                <li><a href="#">Tất cả sản phẩm</a></li>
+                <li><a href="#">Dược phẩm</a></li>
+                <li><a href="#">Chăm sóc cá nhân</a></li>
+                <li><a href="#">Sức khỏe & Sắc đẹp</a></li>
+                <li><a href="#">Mẹ & Bé</a></li>
+                <li><a href="#">Vật tư y tế</a></li>
+                <!-- Thêm các Category từ bảng Category của bạn -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Nội dung chính của trang chủ sẽ ở đây -->
+        <section class="hero-banner">
+            <img src="images/banner_promo.png" alt="Banner khuyến mãi" style="width:100%; max-height: 350px; object-fit: cover;">
+        </section>
+
+        <section class="products-section">
+            <div class="container">
+                <h2>Sản phẩm nổi bật</h2>
+                <div class="product-grid">
+                    <!-- Các thẻ sản phẩm sẽ được render ở đây -->
+                    <div class="product-card">
+                        <img src="images/product_placeholder.png" alt="Tên sản phẩm">
+                        <h3><a href="product_detail.html">Sản phẩm A</a></h3>
+                        <p class="price">250.000 VNĐ</p>
+                        <button class="btn-add-to-cart">Thêm vào giỏ</button>
+                    </div>
+                    <div class="product-card">
+                        <img src="images/product_placeholder.png" alt="Tên sản phẩm">
+                        <h3><a href="product_detail.html">Sản phẩm B</a></h3>
+                        <p class="price">120.000 VNĐ</p>
+                        <button class="btn-add-to-cart">Thêm vào giỏ</button>
+                    </div>
+                    <!-- Thêm nhiều sản phẩm khác -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <!-- Nội dung footer -->
+        <div class="container">
+            <p>&copy; 2023 E-Shop. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Về chúng tôi</a> |
+                <a href="#">Chính sách bảo mật</a> |
+                <a href="#">Liên hệ</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
