@@ -1,45 +1,18 @@
-let allProducts = []
+let allProducts = [];
 
-// const loadProducts = async () => {
-//     try {
-//         const response = await fetch('/list_products');
-//         if (!response.ok) throw Error('Failed to fetch products.');
-
-//         const products = await response.json();
-//         allProducts = products;
-//         renderProducts(products);
-//     }
-//     catch (err) {
-//         console.error('Error loading products: ', err);
-//         document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
-//     }
-// };
-
-const mockProducts = [
-    {
-        name: "Laptop Pro 15",
-        id: 12123,
-        stock: 5,
-    },
-    {
-        name: "Wireless Mouse",
-        id: 11111,
-        stock: 54,
-    },
-    {
-        name: "Mechanical Keyboard",
-        id: 77777,
-        stock: 52,
-    }
-];
-
-// Simulate fetching data (mock)
 const loadProducts = async () => {
-    // Simulate delay as if fetching from server
-    await new Promise(resolve => setTimeout(resolve, 200));
+    try {
+        const response = await fetch('/list_products');
+        if (!response.ok) throw new Error('Failed to fetch products.');
 
-    allProducts = mockProducts;
-    renderProducts(allProducts);
+        const products = await response.json();
+        allProducts = products;
+        renderProducts(products);
+    }
+    catch (err) {
+        console.error('Error loading products: ', err);
+        document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
+    }
 };
 
 const renderProducts = (products) => {

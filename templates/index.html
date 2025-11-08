@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ - E-Shop</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Font Awesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts nếu cần -->
@@ -21,15 +21,15 @@
                 <button><i class="fas fa-search"></i></button>
             </div>
             <div class="header-actions">
-                <a href="cart.html" class="action-item">
+                <a href="/cart.html" class="action-item">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Giỏ hàng</span>
                 </a>
-                <a href="login_register.html" class="action-item">
+                <a href="/login_register.html" class="action-item">
                     <i class="fas fa-user"></i>
                     <span>Đăng nhập</span>
                 </a>
-                <a href="list_products.html" class="product-list">
+                <a href="/list_products" class="product-list">
                     <i class="fas fa-products-list"></i>
                     <span>List of products</span>
                 </a>
@@ -90,6 +90,6 @@
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="../static/script.js"></script>
 </body>
 </html>
