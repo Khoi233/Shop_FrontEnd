@@ -30,7 +30,8 @@ CREATE TABLE `About_Review` (
   KEY `ReviewId` (`ReviewId`),
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `About_Review_ibfk_1` FOREIGN KEY (`ReviewId`) REFERENCES `Reviews` (`ReviewId`),
-  CONSTRAINT `About_Review_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
+  CONSTRAINT `About_Review_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
+  ON DELETE CASCADE,
   CONSTRAINT `About_Review_ibfk_3` FOREIGN KEY (`UserId`) REFERENCES `Buyer` (`UserId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -184,6 +185,7 @@ CREATE TABLE `CartItem_detail` (
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `CartItem_detail_ibfk_1` FOREIGN KEY (`CartId`, `CartItemId`) REFERENCES `CartItem` (`CartId`, `CartItemId`),
   CONSTRAINT `CartItem_detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
+  ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -259,7 +261,8 @@ CREATE TABLE `Create_Promotion` (
   KEY `ProductId` (`ProductId`),
   KEY `UserId` (`UserId`),
   CONSTRAINT `Create_Promotion_ibfk_1` FOREIGN KEY (`PromoId`) REFERENCES `Promotion` (`PromoId`),
-  CONSTRAINT `Create_Promotion_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
+  CONSTRAINT `Create_Promotion_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
+  ON DELETE CASCADE,
   CONSTRAINT `Create_Promotion_ibfk_3` FOREIGN KEY (`UserId`) REFERENCES `Sales_Manager` (`UserId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -427,6 +430,7 @@ CREATE TABLE `Order_are_Detail` (
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `Order_are_Detail_ibfk_1` FOREIGN KEY (`OrdDetail_id`, `OrderId`) REFERENCES `OrderDetail` (`OrdDetail_id`, `OrderId`),
   CONSTRAINT `Order_are_Detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
+  ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -555,7 +559,8 @@ CREATE TABLE `Organize_in_category` (
   `CategoryId` int NOT NULL,
   PRIMARY KEY (`ProductId`),
   KEY `CategoryId` (`CategoryId`),
-  CONSTRAINT `Organize_in_category_ibfk_1` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
+  CONSTRAINT `Organize_in_category_ibfk_1` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
+  ON DELETE CASCADE,
   CONSTRAINT `Organize_in_category_ibfk_2` FOREIGN KEY (`CategoryId`) REFERENCES `Category` (`CategoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -987,6 +992,10 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Dumping events for database 'Pharmacy'
+--
+
+--
 -- Dumping routines for database 'Pharmacy'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -999,4 +1008,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-08  8:50:07
+-- Dump completed on 2025-11-08 10:25:50
