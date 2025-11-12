@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin Dashboard - E-Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .sidebar-nav a.back-link {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .sidebar-nav a.back-link:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#products" class="nav-item" data-section="products">
+                    <i class="fas fa-box"></i> Sản phẩm
+                </a>
+                <a href="#users" class="nav-item" data-section="users">
+                    <i class="fas fa-users"></i> Người dùng
+                </a>
+                <a href="#orders" class="nav-item" data-section="orders">
+                    <i class="fas fa-shopping-cart"></i> Đơn hàng
+                </a>
+                <hr style="margin: 20px 0; opacity: 0.3;">
+                <a href="javascript:void(0);" onclick="goBackToShop()" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Quay lại shop
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="admin-header">
+                <h1>Bảng điều khiển quản trị</h1>
+                <div class="admin-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="admin-username">Admin</span>
+                    <button onclick="adminLogout()" style="margin-left:20px; padding:8px 15px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <section id="dashboard" class="content-section active">
+                <h2>Tổng quan</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon products"><i class="fas fa-box"></i></div>
+                        <div class="stat-info"><h3>Sản phẩm</h3><p id="total-products" class="stat-value">0</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon users"><i class="fas fa-users"></i></div>
+                        <div class="stat-info"><h3>Người dùng</h3><p id="total-users" class="stat-value">0</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orders"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="stat-info"><h3>Đơn hàng</h3><p id="total-orders" class="stat-value">0</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon revenue"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stat-info"><h3>Doanh thu</h3><p id="total-revenue" class="stat-value">0 VNĐ</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="products" class="content-section">
+                <div class="section-header">
+                    <h2>Quản lý sản phẩm</h2>
+                </div>
+                <div id="products-container" class="table-container"><p style="text-align:center;">Đang tải...</p></div>
+            </section>
+
+            <section id="users" class="content-section">
+                <h2>Quản lý người dùng</h2>
+                <div id="users-container" class="table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Tên đăng nhập</th><th>Email</th><th>Tên</th><th>Địa chỉ</th><th>Ngày sinh</th></tr></thead>
+                        <tbody id="users-table-body"><tr><td colspan="6" style="text-align:center;">Đang tải...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="orders" class="content-section">
+                <h2>Quản lý đơn hàng</h2>
+                <div id="orders-container" class="table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Ngày đặt</th><th>Người dùng</th><th>Email</th><th>Trạng thái</th></tr></thead>
+                        <tbody id="orders-table-body"><tr><td colspan="5" style="text-align:center;">Đang tải...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='admin_dashboard.js') }}"></script>
+    <script>
+        // Hàm quay lại shop
+        function goBackToShop() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

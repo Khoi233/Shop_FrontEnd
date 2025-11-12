@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a New Product - Admin/Manager</title>
+    <link rel="stylesheet" href="../static/new_product_form.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="new-product-form-container">
+        <h4 style="text-align: center;">Enter product details below</h4>
+        <form id="new-product-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" placeholder="Enter product name" required><br>
+                
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" placeholder="Enter description" required></textarea><br>
+
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" placeholder="Enter price (int VND)" min="0" step="0.01" required><br>
+
+                <label for="stock">Remaining Stock:</label>
+                <input type="number" id="stock" name="stock" value="0" min="0" required><br>
+
+                <input type="submit" id="new-product-confirm-btn" value="Create">
+                <input type="button" id="new-product-cancel-btn" value="Back">
+        </form>
+    </div>
+
+    <script src="../static/new_product.js"></script>
+</body>
