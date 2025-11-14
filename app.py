@@ -9,7 +9,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',          # change if needed
     'password': '25082005',          # your MySQL password
-    'database': 'pharmacy'   # must match the schema name where Product table exists
+    'database': 'Pharmacy'   # must match the schema name where Product table exists
 }
 
 @app.route('/list_products')
