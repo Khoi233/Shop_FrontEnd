@@ -53,6 +53,10 @@ def require_admin(f):
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
     """Admin login - trả về token"""
+
+    connection = None
+    cursor = None
+
     try:
         data = request.get_json() or {}
         username = (data.get('username') or '').strip()
@@ -61,18 +65,31 @@ def admin_login():
         if not username or not password:
             return jsonify({'error': 'Vui lòng nhập username và password'}), 400
         
-        # TODO: Lấy từ database bảng AdminUser
-        # Hiện tại dùng credentials cứng tạm
-        ADMIN_USERNAME = 'admin'
-        ADMIN_PASSWORD = 'admin123'
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT U.UserId, U.Username, U.HashedPassword 
+            FROM User U
+            JOIN Admin A ON U.UserId = A.UserId
+            WHERE U.Username = %s
+        """
+        cursor.execute(query, (username,))
+        admin = cursor.fetchone()
+
+        if not admin:
+            return jsonify({'error': 'Invalid admin credentials'}), 401
         
-        if username != ADMIN_USERNAME or password != ADMIN_PASSWORD:
+        hashed_password = admin['HashedPassword']
+
+        if not check_password_hash(hashed_password, password):
             return jsonify({'error': 'Invalid admin credentials'}), 401
         
         # Tạo token ngẫu nhiên
         token = secrets.token_urlsafe(32)
         admin_sessions[token] = {
-            'username': username,
+            'user_id': admin['UserId'],
+            'username': admin['Username'],
             'login_time': datetime.now()
         }
         
@@ -80,11 +97,16 @@ def admin_login():
             'success': True,
             'message': 'Admin login successful',
             'token': token,
-            'username': username
+            'username': admin['Username']
         }), 200
     
     except Exception as e:
         return jsonify({'error': f'Error: {str(e)}'}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 @app.route('/api/admin/logout', methods=['POST'])
 @require_admin
