@@ -1,6 +1,75 @@
-let allProducts = [];
+const API_BASE = 'http://127.0.0.1:5001';
 
-const createUpdateForm = (product) => {
+let allProducts = [];
+let activeCategoryId = 'all';
+let categories = [];
+
+const loadProductsByCategory = async (categoryId) => {
+    activeCategoryId = categoryId;
+
+    try {
+        const response = await fetch(`${API_BASE}/list_products?category_id=${categoryId}`);
+        if (!response.ok) throw new Error('Failed to fetch products.');
+
+        const products = await response.json();
+        allProducts = products;
+
+        document.querySelector('.product-search').value = '';
+
+        renderProducts(products);
+    }
+    catch (err) {
+        console.error('Error loading products: ', err);
+        document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
+    }
+};
+
+
+const fetchCategories = async () => { // Copy from new_product.js, delete if found a way to import
+    const categorySelect = document.getElementById('category');
+
+    try {
+        const response = await fetch(`${API_BASE}/categories`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch categories. Status ${response.status}`);
+        }
+        categories = await response.json();
+        renderCategoryButtons(categories);
+    }
+    catch (err) {
+        console.error('Error fetching categories: ', err);
+
+        const errorMessage = document.createElement('option');
+        errorMessage.value = '';
+        errorMessage.textContent = 'Failed to load categories';
+        categorySelect.appendChild(errorMessage);
+    }
+}
+
+const renderCategoryButtons = (categories) => {
+    const panel = document.getElementById('category-filter-panel');
+    panel.innerHTML = '<button id="category-all" data-category-id="all" class="category-btn active">All Products</button>';
+
+    categories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'category-btn';
+        button.id = `category-${category.CategoryId}`;
+        button.setAttribute('data-category-id', category.CategoryId);
+        button.textContent = category.Name;
+        panel.appendChild(button);
+    });
+
+    panel.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const categoryId = e.target.getAttribute('data-category-id');
+            filterByCategory(categoryId);
+        })
+    });
+}
+
+const createUpdateForm = async (product) => {
+
     document.getElementById('update-form-container')?.remove();
 
     const formContainer = document.createElement('div');
@@ -11,13 +80,16 @@ const createUpdateForm = (product) => {
 
     formContainer.innerHTML = `
     <div class="update-form-modal">
-            <h3>Update product: ${product.Name} (ID: ${product.ID})</h3>
+            <h3>Update product: ${product.Name} (ID: ${product.ProductId})</h3>
             <form id="product-update-form">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" value="${product.Name}" required><br>
                 
                 <label for="description">Description:</label>
                 <textarea id="description" name="description" required>${product.Description}</textarea><br>
+                
+                <label for="category">Category:</label>
+                <select id="category" name="category" required><option value="" disabled selected>Select category</option></select><br>
 
                 <label for="price">Price:</label>
                 <input type="number" id="price" name="price" value="${product.Price}" min="0" step="0.01" required><br>
@@ -33,6 +105,19 @@ const createUpdateForm = (product) => {
 
     document.body.appendChild(formContainer);
 
+    try {
+        await fetchCategories();
+
+        const categorySelect = document.getElementById('category');
+
+        if (product.CategoryId) {
+            categorySelect.value = product.CategoryId;
+        }
+    }
+    catch (err) {
+        console.error('Error setting product category: ', err);
+    }
+
     document.getElementById('cancel-update-btn').addEventListener('click', () => {
         formContainer.remove();
     });
@@ -45,16 +130,18 @@ const createUpdateForm = (product) => {
 
 const handleUpdateSubmit = async (productId, formContainer) => {
     const form = document.getElementById('product-update-form');
+
     const updatedData = {
         Description: form.description.value,
         Name: form.name.value,
         Price: parseFloat(form.price.value),
         ProductId: productId,
-        Stock: parseInt(form.stock.value)
+        Stock: parseInt(form.stock.value),
+        CategoryId: form.category.value
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/update_product', {
+        const response = await fetch(`${API_BASE}/update_product`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -78,21 +165,6 @@ const handleUpdateSubmit = async (productId, formContainer) => {
     }
 }
 
-const loadProducts = async () => {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/list_products');
-        if (!response.ok) throw new Error('Failed to fetch products.');
-
-        const products = await response.json();
-        allProducts = products;
-        renderProducts(products);
-    }
-    catch (err) {
-        console.error('Error loading products: ', err);
-        document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
-    }
-};
-
 const renderProducts = (products) => {
     console.log("Rendering...");
     const container = document.getElementById('product-list');
@@ -108,7 +180,7 @@ const renderProducts = (products) => {
         card.className = 'product-card';
 
         card.innerHTML = `
-        <div className="product-details">
+        <div class="product-details">
             <div class="product-id">ID: ${product.ProductId}</div>
             <div class="product-name">Name: ${product.Name}</div>
             <div class="product-description">Description: ${product.Description}</div>
@@ -133,15 +205,31 @@ const renderProducts = (products) => {
     })
 }
 
+const filterByCategory = (categoryId) => {
+    activeCategoryId = (categoryId === 'all') ? null : parseInt(categoryId);
+
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.querySelector(`[data-category-id="${categoryId}"]`).classList.add('active');
+
+    document.querySelector('.product-search').value = '';
+
+    loadProductsByCategory(categoryId);
+}
+
 const filterProducts = () => {
     const searchInput = document.querySelector('.product-search').value.trim().toLowerCase();
+
+    let filteredProducts = allProducts;
 
     if (!searchInput) {
         renderProducts(allProducts);
         return;
     }
 
-    const filteredProducts = allProducts.filter(p => 
+    filteredProducts = allProducts.filter(p => 
         p.Name.toLowerCase().includes(searchInput)
     );
 
@@ -179,7 +267,7 @@ const confirmDeletion = (product) => {
 
 const handleProductDeletion = async (productId, confirmationContainer) => {
     try {
-        const response = await fetch(`http://127.0.0.1:5000/delete_product/${productId}`, {
+        const response = await fetch(`${API_BASE}/delete_product/${productId}`, {
             method: 'DELETE',
         });
 
@@ -201,46 +289,9 @@ const handleProductDeletion = async (productId, confirmationContainer) => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadProducts();
+    fetchCategories();
+    loadProductsByCategory('all');
 
     const searchBtn = document.getElementById('search-product-btn');
     searchBtn.addEventListener('click', filterProducts);
-
-    const newProductBtn = document.getElementById('new-product-btn');
-    newProductBtn.addEventListener('click', () => {
-        location.href = "new_product_form.html";
-    })
 })
-
-const addToCart = async (productId) => {
-    const userId = localStorage.getItem('user_id');
-    
-    if (!userId) {
-        alert('Vui lòng đăng nhập trước');
-        window.location.href = './login_register.html';
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE}/api/cart/add`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: userId,
-                product_id: productId,
-                quantity: 1
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('✅ Thêm vào giỏ hàng thành công');
-        } else {
-            alert('❌ ' + data.error);
-        }
-    } catch (err) {
-        console.error('Error:', err);
-        alert('Lỗi thêm vào giỏ hàng');
-    }
-};

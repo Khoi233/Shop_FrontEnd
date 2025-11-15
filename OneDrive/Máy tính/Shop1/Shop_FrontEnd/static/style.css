@@ -84,6 +84,38 @@ body {
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
 /* --- MAIN NAVIGATION (Categories) --- */
+.category-filter-panel {
+    /* Container to hold and center the buttons */
+    background-color: #007bff; /* Màu xanh Long Châu */
+    padding: 10px 0;
+    display: flex; /* Enables centering */
+    justify-content: center; /* Centers the buttons horizontally */
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    gap: 10px; /* Space between buttons */
+}
+
+.category-btn {
+    /* Styling for the individual button */
+    color: #fff;
+    background-color: transparent; /* Transparent background */
+    border: none; /* Remove default button border */
+    text-decoration: none;
+    padding: 8px 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-radius 0.2s ease;
+    
+    /* Ensure text alignment is centered if needed */
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.category-btn:hover,
+.category-btn.active { /* Use .active for the currently selected button */
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
 .main-nav {
     background-color: #007bff; /* Màu xanh Long Châu */
     padding: 10px 0;
@@ -96,20 +128,6 @@ body {
     margin: 0 auto;
     padding: 0 20px;
     list-style: none;
-}
-
-.main-nav-list li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 8px 15px;
-    display: block;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-}
-
-.main-nav-list li a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
 }
 
 /* Thêm kiểu cho dropdown menu nếu cần */
@@ -210,19 +228,27 @@ body {
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Responsive grid */
+    grid-template-columns: repeat(5, 1fr); 
     gap: 25px;
+    max-width: 1200px; /* Example: 5 columns * 200px width + 4 gaps * 25px = 1100px */
+    
+    /* 2. Center the block */
+    margin: 0 auto;
 }
 
 .product-card {
+    /* Retained existing styles */
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     padding: 15px;
     text-align: center;
     transition: transform 0.2s ease;
+    
+    /* * Since the grid template is set to 1fr, the card width is determined
+     * by the grid system, ensuring equal fixed box size across the row.
+     */
 }
-
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);

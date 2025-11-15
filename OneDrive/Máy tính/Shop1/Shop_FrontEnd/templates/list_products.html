@@ -12,14 +12,13 @@
     <div style="text-align:center; margin-bottom:20px;">
         <input type="text" class="product-search" placeholder="Enter product name to search" size="100">
         <button id="search-product-btn">Search</button><br>
-        <button id="new-product-btn">Create a new product</button>
-        <button onclick="addToCart(${product.ProductId})" class="btn btn-primary">
-    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-</button>
+        <a href="./new_product_form.html">Add a new product</a>
     </div>
 </head>
 <body>
     <main>
+        <div id="category-filter-panel" class="category-panel">
+        </div>
         <div id="product-list" class="product-list">
         </div>
     </main>

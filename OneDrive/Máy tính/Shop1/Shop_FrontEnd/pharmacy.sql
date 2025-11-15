@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 9.4.0, for macos15.4 (arm64)
 --
--- Host: localhost    Database: Pharmacy
+-- Host: 127.0.0.1    Database: Pharmacy
 -- ------------------------------------------------------
--- Server version	9.4.0
+-- Server version	8.0.43
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -30,8 +30,7 @@ CREATE TABLE `About_Review` (
   KEY `ReviewId` (`ReviewId`),
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `About_Review_ibfk_1` FOREIGN KEY (`ReviewId`) REFERENCES `Reviews` (`ReviewId`),
-  CONSTRAINT `About_Review_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
-  ON DELETE CASCADE,
+  CONSTRAINT `About_Review_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
   CONSTRAINT `About_Review_ibfk_3` FOREIGN KEY (`UserId`) REFERENCES `Buyer` (`UserId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -133,7 +132,7 @@ CREATE TABLE `Cart` (
   PRIMARY KEY (`CartId`),
   KEY `UserId` (`UserId`),
   CONSTRAINT `Cart_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `User` (`UserId`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -142,6 +141,7 @@ CREATE TABLE `Cart` (
 
 LOCK TABLES `Cart` WRITE;
 /*!40000 ALTER TABLE `Cart` DISABLE KEYS */;
+INSERT INTO `Cart` VALUES (3,'2025-11-14',6);
 /*!40000 ALTER TABLE `Cart` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -166,6 +166,7 @@ CREATE TABLE `CartItem` (
 
 LOCK TABLES `CartItem` WRITE;
 /*!40000 ALTER TABLE `CartItem` DISABLE KEYS */;
+INSERT INTO `CartItem` VALUES (3,1);
 /*!40000 ALTER TABLE `CartItem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -185,7 +186,6 @@ CREATE TABLE `CartItem_detail` (
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `CartItem_detail_ibfk_1` FOREIGN KEY (`CartId`, `CartItemId`) REFERENCES `CartItem` (`CartId`, `CartItemId`),
   CONSTRAINT `CartItem_detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
-  ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -195,6 +195,7 @@ CREATE TABLE `CartItem_detail` (
 
 LOCK TABLES `CartItem_detail` WRITE;
 /*!40000 ALTER TABLE `CartItem_detail` DISABLE KEYS */;
+INSERT INTO `CartItem_detail` VALUES (3,1,3,2);
 /*!40000 ALTER TABLE `CartItem_detail` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -261,8 +262,7 @@ CREATE TABLE `Create_Promotion` (
   KEY `ProductId` (`ProductId`),
   KEY `UserId` (`UserId`),
   CONSTRAINT `Create_Promotion_ibfk_1` FOREIGN KEY (`PromoId`) REFERENCES `Promotion` (`PromoId`),
-  CONSTRAINT `Create_Promotion_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
-  ON DELETE CASCADE,
+  CONSTRAINT `Create_Promotion_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
   CONSTRAINT `Create_Promotion_ibfk_3` FOREIGN KEY (`UserId`) REFERENCES `Sales_Manager` (`UserId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -385,34 +385,6 @@ LOCK TABLES `OrderDetail` WRITE;
 /*!40000 ALTER TABLE `OrderDetail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `OrderDetail` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_decrease_stock_after_order` AFTER INSERT ON `OrderDetail` FOR EACH ROW BEGIN
-    UPDATE Product
-    SET Stock = Stock - (
-        SELECT IFNULL(SUM(OAD.Quantity), 0)
-        FROM Order_are_Detail AS OAD
-        WHERE OAD.OrdDetail_id = NEW.OrdDetail_id
-          AND OAD.ProductId = Product.ProductId
-    )
-    WHERE Product.ProductId IN (
-        SELECT ProductId
-        FROM Order_are_Detail
-        WHERE OrdDetail_id = NEW.OrdDetail_id
-    );
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `Order_are_Detail`
@@ -426,11 +398,11 @@ CREATE TABLE `Order_are_Detail` (
   `OrderId` int NOT NULL,
   `ProductId` int NOT NULL,
   `Quantity` int DEFAULT NULL,
+  `TotalAmount` decimal(10,2) NOT NULL COMMENT 'The total price for this line item (Quantity * Price at time of purchase)',
   PRIMARY KEY (`OrdDetail_id`,`OrderId`,`ProductId`),
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `Order_are_Detail_ibfk_1` FOREIGN KEY (`OrdDetail_id`, `OrderId`) REFERENCES `OrderDetail` (`OrdDetail_id`, `OrderId`),
   CONSTRAINT `Order_are_Detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
-  ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -500,20 +472,21 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_update_total_after_order_change` AFTER INSERT ON `Order_are_Detail` FOR EACH ROW BEGIN
-    UPDATE `Order`
-    SET TotalAmount = (
-        SELECT SUM(OAD.Quantity * P.Price)
-        FROM Order_are_Detail AS OAD
-        JOIN Product AS P ON OAD.ProductId = P.ProductId
-        JOIN OrderDetail AS OD ON OAD.OrdDetail_id = OD.OrdDetail_id
-        WHERE OD.OrderId = (
-            SELECT OrderId FROM OrderDetail WHERE OrdDetail_id = NEW.OrdDetail_id LIMIT 1
-        )
-    )
-    WHERE OrderId = (
-        SELECT OrderId FROM OrderDetail WHERE OrdDetail_id = NEW.OrdDetail_id LIMIT 1
-    );
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_decrease_stock_after_order` AFTER INSERT ON `Order_are_Detail` FOR EACH ROW BEGIN
+    UPDATE Product
+    -- SET Stock = Stock - (
+    --     SELECT IFNULL(SUM(OAD.Quantity), 0)
+    --     FROM Order_are_Detail AS OAD
+    --     WHERE OAD.OrdDetail_id = NEW.OrdDetail_id
+    --       AND OAD.ProductId = Product.ProductId
+    -- )
+    SET Stock = Stock - NEW.Quantity
+    -- WHERE Product.ProductId IN (
+    --     SELECT ProductId
+    --     FROM Order_are_Detail
+    --     WHERE OrdDetail_id = NEW.OrdDetail_id
+    -- );
+    WHERE ProductId = NEW.ProductId;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -559,8 +532,7 @@ CREATE TABLE `Organize_in_category` (
   `CategoryId` int NOT NULL,
   PRIMARY KEY (`ProductId`),
   KEY `CategoryId` (`CategoryId`),
-  CONSTRAINT `Organize_in_category_ibfk_1` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`)
-  ON DELETE CASCADE,
+  CONSTRAINT `Organize_in_category_ibfk_1` FOREIGN KEY (`ProductId`) REFERENCES `Product` (`ProductId`),
   CONSTRAINT `Organize_in_category_ibfk_2` FOREIGN KEY (`CategoryId`) REFERENCES `Category` (`CategoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -588,7 +560,10 @@ CREATE TABLE `Payment` (
   `Amount` decimal(10,2) DEFAULT NULL,
   `Status` varchar(50) DEFAULT NULL,
   `Creation_Date` date DEFAULT NULL,
-  PRIMARY KEY (`PaymentId`)
+  `OrderId` int NOT NULL,
+  PRIMARY KEY (`PaymentId`),
+  KEY `fk_Payment_Order_idx` (`OrderId`),
+  CONSTRAINT `fk_Payment_Order` FOREIGN KEY (`OrderId`) REFERENCES `Order` (`OrderId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -992,12 +967,1068 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Temporary view structure for view `vw_TopBuyers`
+--
+
+DROP TABLE IF EXISTS `vw_TopBuyers`;
+/*!50001 DROP VIEW IF EXISTS `vw_TopBuyers`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_TopBuyers` AS SELECT 
+ 1 AS `UserId`,
+ 1 AS `TotalSpent`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_TopProducts`
+--
+
+DROP TABLE IF EXISTS `vw_TopProducts`;
+/*!50001 DROP VIEW IF EXISTS `vw_TopProducts`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_TopProducts` AS SELECT 
+ 1 AS `ProductId`,
+ 1 AS `TotalSold`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vw_TopSellingProducts`
+--
+
+DROP TABLE IF EXISTS `vw_TopSellingProducts`;
+/*!50001 DROP VIEW IF EXISTS `vw_TopSellingProducts`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_TopSellingProducts` AS SELECT 
+ 1 AS `ProductId`,
+ 1 AS `Name`,
+ 1 AS `TotalSold`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Dumping events for database 'Pharmacy'
 --
 
 --
 -- Dumping routines for database 'Pharmacy'
 --
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP FUNCTION IF EXISTS `fn_CountProductByCategory` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fn_CountProductByCategory`(catId INT) RETURNS int
+    READS SQL DATA
+BEGIN
+    DECLARE cnt INT;
+    
+    -- MODIFIED: Join with 'Organize_in_category'
+    -- The 'Product' table no longer has a 'CategoryId' column.
+    SELECT COUNT(*) INTO cnt 
+    FROM `Product` p
+    JOIN `Organize_in_category` oic ON p.ProductId = oic.ProductId
+    WHERE oic.CategoryId = catId;
+    
+    RETURN cnt;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP FUNCTION IF EXISTS `fn_GetFinalProductPrice` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fn_GetFinalProductPrice`(
+    p_ProductId INT
+) RETURNS decimal(10,2)
+    READS SQL DATA
+BEGIN
+    DECLARE v_BasePrice DECIMAL(10,2);
+    DECLARE v_PromoType VARCHAR(50);
+    DECLARE v_PromoValue DECIMAL(10,2);
+    DECLARE v_FinalPrice DECIMAL(10,2);
+
+    -- 1. Get the base price
+    SELECT Price INTO v_BasePrice FROM Product WHERE ProductId = p_ProductId;
+    SET v_FinalPrice = v_BasePrice; -- Default to base price
+
+    -- 2. Find an active promotion for this product
+    SELECT 
+        p.Type, p.Value
+    INTO v_PromoType, v_PromoValue
+    FROM `Promotion` p
+    JOIN `Create_Promotion` cp ON p.PromoId = cp.PromoId
+    WHERE 
+        cp.ProductId = p_ProductId
+        AND NOW() BETWEEN p.StartPeriod AND p.EndPeriod -- Check if promo is active
+    LIMIT 1; -- Get the first active promo (nếu có nhiều)
+
+    -- 3. Calculate final price if a promo was found
+    IF v_PromoType IS NOT NULL THEN
+        IF v_PromoType = 'PERCENT' THEN
+            -- Giảm theo % (Vd: Value = 10.00 nghĩa là giảm 10%)
+            SET v_FinalPrice = v_BasePrice * (1 - (v_PromoValue / 100.0));
+        ELSEIF v_PromoType = 'FIXED_AMOUNT' THEN
+            -- Giảm tiền cố định (Vd: Value = 10000 nghĩa là giảm 10.000đ)
+            SET v_FinalPrice = v_BasePrice - v_PromoValue;
+        END IF;
+        
+        -- Ensure price doesn't go below zero
+        IF v_FinalPrice < 0 THEN
+            SET v_FinalPrice = 0;
+        END IF;
+    END IF;
+
+    RETURN v_FinalPrice;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP FUNCTION IF EXISTS `fn_LoyaltyLevel` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fn_LoyaltyLevel`(buyerId INT) RETURNS varchar(20) CHARSET utf8mb4
+    READS SQL DATA
+BEGIN
+    DECLARE points INT;
+    DECLARE level VARCHAR(20);
+    SELECT LoyaltyPoint INTO points FROM Buyer WHERE UserId = buyerId;
+
+    IF points >= 100 THEN
+        SET level = 'Gold';
+    ELSEIF points >= 50 THEN
+        SET level = 'Silver';
+    ELSE
+        SET level = 'Bronze';
+    END IF;
+
+    RETURN level;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP FUNCTION IF EXISTS `fn_TotalSpentByBuyer` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` FUNCTION `fn_TotalSpentByBuyer`(buyerId INT) RETURNS decimal(12,2)
+    READS SQL DATA
+BEGIN
+    DECLARE total DECIMAL(12,2);
+    
+    -- MODIFIED: Must join the multi-table 'Order' structure
+    SELECT IFNULL(SUM(oad.TotalAmount), 0)
+    INTO total
+    FROM `Order_are_Detail` oad
+    JOIN `OrderDetail` od ON oad.OrdDetail_id = od.OrdDetail_id AND oad.OrderId = od.OrderId
+    JOIN `Order` o ON od.OrderId = o.OrderId
+    WHERE o.UserId = buyerId; -- UserId is on the 'Order' table
+    
+    RETURN total;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddBankPayment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddBankPayment`(
+    IN p_OrderId INT,
+    IN p_Amount DECIMAL(10,2),
+    IN p_CardNumber VARCHAR(30),
+    IN p_FromCompany VARCHAR(100)
+)
+BEGIN
+    DECLARE v_PaymentId INT;
+    START TRANSACTION;
+    
+    -- Insert into parent table
+    INSERT INTO Payment (OrderId, Amount, PayDate, Status)
+    VALUES (p_OrderId, p_Amount, NOW(), 'Completed');
+    
+    SET v_PaymentId = LAST_INSERT_ID();
+    
+    -- Insert into child table
+    INSERT INTO Bank_Card (PaymentId, CardNumber, FromCompany)
+    VALUES (v_PaymentId, p_CardNumber, p_FromCompany);
+    
+    -- Update order status --
+    UPDATE `Order`
+        SET `Status` = 'Completed'
+        WHERE `OrderId` = p_OrderId;
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddCashPayment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddCashPayment`(
+    IN p_OrderId INT,
+    IN p_Amount DECIMAL(10,2)
+)
+BEGIN
+    DECLARE v_PaymentId INT;
+    START TRANSACTION;
+    
+    INSERT INTO Payment (OrderId, Amount, PayDate, Status)
+    VALUES (p_OrderId, p_Amount, NOW(), 'Pending'); -- Status là 'Pending' cho COD
+    
+    SET v_PaymentId = LAST_INSERT_ID();
+    
+    INSERT INTO Cash_on_Delivery (PaymentId)
+    VALUES (v_PaymentId);
+    
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddEWalletPayment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddEWalletPayment`(
+    IN p_OrderId INT,
+    IN p_Amount DECIMAL(10,2),
+    IN p_WalletNumber VARCHAR(30),
+    IN p_FromCompany VARCHAR(100)
+)
+BEGIN
+    DECLARE v_PaymentId INT;
+    START TRANSACTION;
+    
+    INSERT INTO Payment (OrderId, Amount, PayDate, Status)
+    VALUES (p_OrderId, p_Amount, NOW(), 'Completed');
+    
+    SET v_PaymentId = LAST_INSERT_ID();
+    
+    INSERT INTO EWallet (PaymentId, WalletNumber, FromCompany)
+    VALUES (v_PaymentId, p_WalletNumber, p_FromCompany);
+    
+    -- Update order status --
+    UPDATE `Order`
+        SET `Status` = 'Completed'
+        WHERE `OrderId` = p_OrderId;
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddProduct` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddProduct`(
+    IN p_Name VARCHAR(50),
+    IN p_Price DECIMAL(10,2),
+    IN p_Stock INT,
+    IN p_Desc TEXT,
+    IN p_CategoryId INT
+)
+BEGIN
+    DECLARE v_ProductId INT;
+    
+    -- MODIFIED: Use a transaction to insert into two tables.
+    START TRANSACTION;
+    
+    -- 1. Insert into 'Product' table (which no longer has CategoryId)
+    INSERT INTO Product (Name, Price, Stock, Description)
+    VALUES (p_Name, p_Price, p_Stock, p_Desc);
+    
+    -- 2. Get the new ProductId
+    SET v_ProductId = LAST_INSERT_ID();
+    
+    -- 3. Insert the relationship into 'Organize_in_category'
+    INSERT INTO Organize_in_category (ProductId, CategoryId)
+    VALUES (v_ProductId, p_CategoryId);
+    
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddProductToCart` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddProductToCart`(
+    IN p_BuyerId INT,
+    IN p_ProductId INT,
+    IN p_Quantity INT
+)
+BEGIN
+    DECLARE v_CartId INT;
+    DECLARE v_CartItemId INT;
+
+    -- 1. Find the active cart for the buyer (Same as before)
+    SELECT CartId INTO v_CartId
+    FROM Cart
+    WHERE UserId = p_BuyerId
+    LIMIT 1;
+
+    -- 2. If no cart exists, create one (Same as before)
+    IF v_CartId IS NULL THEN
+        INSERT INTO Cart (UserId, CreationDate)
+        VALUES (p_BuyerId, NOW());
+        SET v_CartId = LAST_INSERT_ID();
+    END IF;
+
+    -- 3. MODIFIED: Logic for 2-table (CartItem, CartItem_detail)
+    -- Check if this product already exists in the cart
+    SELECT cid.CartItemId INTO v_CartItemId
+    FROM `CartItem_detail` cid
+    WHERE cid.CartId = v_CartId AND cid.ProductId = p_ProductId
+    LIMIT 1;
+
+    IF v_CartItemId IS NOT NULL THEN
+        -- Product exists: Just update the quantity
+        UPDATE `CartItem_detail`
+        SET Amount = Amount + p_Quantity
+        WHERE CartId = v_CartId AND CartItemId = v_CartItemId;
+    ELSE
+        -- Product does not exist: Must insert into both tables
+        START TRANSACTION;
+        
+        -- Generate a new CartItemId (e.g., MAX + 1 for this cart)
+        SELECT IFNULL(MAX(CartItemId), 0) + 1 INTO v_CartItemId 
+        FROM `CartItem` 
+        WHERE CartId = v_CartId;
+
+        -- Insert into parent table
+        INSERT INTO `CartItem` (CartId, CartItemId)
+        VALUES (v_CartId, v_CartItemId);
+        
+        -- Insert into child detail table
+        INSERT INTO `CartItem_detail` (CartId, CartItemId, ProductId, Amount)
+        VALUES (v_CartId, v_CartItemId, p_ProductId, p_Quantity);
+        
+        COMMIT;
+    END IF;
+        
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddReview` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddReview`(
+    IN p_UserId INT,
+    IN p_ProductId INT,
+    IN p_Rating INT,
+    IN p_Content TEXT
+)
+BEGIN
+    DECLARE v_ReviewId INT;
+    
+    -- MODIFIED: Must insert into two tables
+    START TRANSACTION;
+    
+    -- 1. Insert into the parent 'Reviews' table
+    INSERT INTO Reviews (Rating, Content)
+    VALUES (p_Rating, p_Content);
+    
+    -- 2. Get the new ReviewId
+    SET v_ReviewId = LAST_INSERT_ID();
+    
+    -- 3. Insert into the child 'About_Review' linking table
+    INSERT INTO About_Review (UserId, ReviewId, ProductId)
+    VALUES (p_UserId, v_ReviewId, p_ProductId);
+    
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddShipment` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddShipment`(
+    IN p_OrderId INT,
+    IN p_Status VARCHAR(50),
+    IN p_ThirdPartyId INT,
+    IN p_ShipperId INT
+)
+BEGIN
+    DECLARE v_ShipmentId INT;
+
+    -- MODIFIED: Must insert into three tables
+    START TRANSACTION;
+    
+    -- 1. Create the parent 'Shipment' record
+    -- (The 'Shipment' table does NOT have OrderId)
+    INSERT INTO Shipment (ShippingDate, Status)
+    VALUES (NOW(), p_Status);
+    
+    -- 2. Get the new ShipmentId
+    SET v_ShipmentId = LAST_INSERT_ID();
+    
+    -- 3. Create the specialization record
+    INSERT INTO Shipment_Third_Party (ShipmentId, ThirdPartyId, ShipperId)
+    VALUES (v_ShipmentId, p_ThirdPartyId, p_ShipperId);
+    
+    -- 4. Create the link back to the Order
+    INSERT INTO Order_with_Shipment (ShipmentId, OrderId)
+    VALUES (v_ShipmentId, p_OrderId);
+    
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddThirdParty` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddThirdParty`(
+    IN p_Name VARCHAR(100),
+    IN p_Website VARCHAR(255),
+    IN p_Address VARCHAR(255),
+    IN p_ContactInfo VARCHAR(255)
+)
+BEGIN
+    INSERT INTO ThirdParty (Name, Website, Address, ContactInfo)
+    VALUES (p_Name, p_Website, p_Address, p_ContactInfo);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddThirdPartyHotline` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddThirdPartyHotline`(
+    IN p_ThirdPartyId INT,
+    IN p_Hotline VARCHAR(20)
+)
+BEGIN
+    INSERT INTO ThirdParty_Hotline (ThirdPartyId, AHotline)
+    VALUES (p_ThirdPartyId, p_Hotline);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_AddUserPhone` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_AddUserPhone`(
+    IN p_UserId INT,
+    IN p_PhoneNumber VARCHAR(20)
+)
+BEGIN
+    INSERT INTO UserPhone (UserId, APhoneNumber)
+    VALUES (p_UserId, p_PhoneNumber);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ApplyPromotionToProduct` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_ApplyPromotionToProduct`(
+    IN p_SalesManagerId INT,
+    IN p_PromoId INT,
+    IN p_ProductId INT
+)
+BEGIN
+    -- Check if the user is a Sales Manager
+    IF EXISTS (SELECT 1 FROM Sales_Manager WHERE UserId = p_SalesManagerId) THEN
+        INSERT INTO Create_Promotion (UserId, PromoId, ProductId)
+        VALUES (p_SalesManagerId, p_PromoId, p_ProductId);
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User is not a Sales Manager';
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_CreateOrder` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_CreateOrder`(IN p_BuyerId INT)
+BEGIN
+    DECLARE v_CartId INT;
+    DECLARE v_OrderId INT;
+
+    -- Error handling
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK; -- Rollback all changes if any error occurs
+        RESIGNAL;
+    END;
+
+    -- 1. Find the buyer's cart
+    SELECT CartId INTO v_CartId
+    FROM Cart
+    WHERE UserId = p_BuyerId
+    LIMIT 1;
+
+    -- 2. Start the transaction if cart exists and has items
+    -- MODIFIED: Check the CartItem table
+    IF v_CartId IS NOT NULL AND EXISTS (SELECT 1 FROM CartItem WHERE CartId = v_CartId) THEN
+        
+        START TRANSACTION;
+
+        -- 3. Create the main Order record
+        INSERT INTO `Order` (UserId, OrderDate, Status)
+        VALUES (p_BuyerId, NOW(), 'Pending');
+        
+        SET v_OrderId = LAST_INSERT_ID();
+
+        -- 4. MODIFIED: Copy items from Cart (multi-table) to Order (multi-table)
+        
+        -- 4a. Insert into OrderDetail (the parent linking table)
+        -- We use the CartItemId as the new OrdDetail_id
+        INSERT INTO OrderDetail (OrdDetail_id, OrderId)
+        SELECT 
+            ci.CartItemId, 
+            v_OrderId
+        FROM CartItem ci
+        WHERE ci.CartId = v_CartId;
+        
+        -- 4b. Insert into Order_are_Detail (the detail table)
+        -- We join Product to get the price and "freeze" it in TotalAmount
+        INSERT INTO Order_are_Detail (OrdDetail_id, OrderId, ProductId, Quantity, TotalAmount)
+        SELECT
+            cid.CartItemId,
+            v_OrderId,
+            cid.ProductId,
+            cid.Amount,
+            -- TÍNH TOÁN QUAN TRỌNG:
+            -- Lấy giá cuối cùng (đã giảm) nhân với số lượng
+            -- và "đóng băng" nó vào cột TotalAmount
+            (cid.Amount * fn_GetFinalProductPrice(cid.ProductId)) AS CalculatedTotal
+        FROM CartItem_detail cid
+        -- JOIN Product p ON cid.ProductId = p.ProductId -- No need
+        WHERE cid.CartId = v_CartId;
+
+        -- 5. MODIFIED: Clear the cart (child tables first)
+        DELETE FROM CartItem_detail WHERE CartId = v_CartId;
+        DELETE FROM CartItem WHERE CartId = v_CartId;
+
+        -- 6. Commit the transaction
+        COMMIT;
+        
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_CreatePromotion` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_CreatePromotion`(
+    IN p_SalesManagerId INT,
+    IN p_Type VARCHAR(50),
+    IN p_Value DECIMAL(10,2),
+    IN p_StartPeriod DATE,
+    IN p_EndPeriod DATE
+)
+BEGIN
+    -- Check if the user is actually a Sales Manager
+    IF EXISTS (SELECT 1 FROM Sales_Manager WHERE UserId = p_SalesManagerId) THEN
+        INSERT INTO Promotion (Type, Value, StartPeriod, EndPeriod)
+        VALUES (p_Type, p_Value, p_StartPeriod, p_EndPeriod);
+    ELSE
+        -- Raise an error if user is not authorized
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User is not a Sales Manager';
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_CreateReport` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_CreateReport`(
+    IN p_AdminId INT,
+    IN p_ReportType VARCHAR(50),
+    IN p_Content TEXT
+)
+BEGIN
+    -- Check if the user is an Admin
+    IF EXISTS (SELECT 1 FROM Admin WHERE UserId = p_AdminId) THEN
+        INSERT INTO Report (Content, ReportType, CreationDate, UserId)
+        VALUES (p_Content, p_ReportType, NOW(), p_AdminId);
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User is not an Admin';
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_GetCartDetails` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_GetCartDetails`(
+    IN p_UserId INT
+)
+BEGIN
+    -- MODIFIED: Must join all 4 tables AND use the new Function
+    SELECT 
+        p.ProductId,
+        p.Name,
+        p.Price AS OriginalPrice, -- Giá gốc
+        fn_GetFinalProductPrice(p.ProductId) AS FinalPrice, -- Giá đã giảm
+        cid.Amount,
+        (fn_GetFinalProductPrice(p.ProductId) * cid.Amount) AS LineTotal -- Tổng tiền đã giảm
+    FROM `Cart` c
+    JOIN `CartItem` ci ON c.CartId = ci.CartId
+    JOIN `CartItem_detail` cid ON ci.CartId = cid.CartId AND ci.CartItemId = cid.CartItemId
+    JOIN `Product` p ON cid.ProductId = p.ProductId
+    WHERE c.UserId = p_UserId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_GetOrderDetails` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_GetOrderDetails`(
+    IN p_OrderId INT
+)
+BEGIN
+    -- MODIFIED: Must join the multi-table structure
+    -- (Order -> OrderDetail -> Order_are_Detail -> Product)
+    SELECT 
+        p.ProductId,
+        p.Name,
+        p.Price AS CurrentProductPrice, -- Giá hiện tại của SP
+        oad.Quantity,
+        oad.TotalAmount AS LineTotal     -- Giá đã lưu lúc mua hàng
+    FROM `OrderDetail` od
+    JOIN `Order_are_Detail` oad ON od.OrdDetail_id = oad.OrdDetail_id AND od.OrderId = oad.OrderId
+    JOIN `Product` p ON oad.ProductId = p.ProductId
+    WHERE od.OrderId = p_OrderId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ProcessReferral` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_ProcessReferral`(
+    IN p_RefereeId INT, -- The new user (who was referred)
+    IN p_ReferrerId INT -- The existing user (who did the referring)
+)
+BEGIN
+    INSERT INTO Refer_Id (Referee_Id, Referrer_Id, ReferDate)
+    VALUES (p_RefereeId, p_ReferrerId, NOW());
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_RemoveProductFromCart` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_RemoveProductFromCart`(
+    IN p_CartId INT,
+    IN p_ProductId INT
+)
+BEGIN
+    DECLARE v_CartItemId INT;
+    
+    -- MODIFIED: Find CartItemId using ProductId
+    SELECT CartItemId INTO v_CartItemId
+    FROM `CartItem_detail`
+    WHERE `CartId` = p_CartId AND `ProductId` = p_ProductId;
+
+    IF v_CartItemId IS NOT NULL THEN
+        -- MODIFIED: Must delete from both tables (child first)
+        DELETE FROM `CartItem_detail` WHERE `CartId` = p_CartId AND `CartItemId` = v_CartItemId;
+        DELETE FROM `CartItem` WHERE `CartId` = p_CartId AND `CartItemId` = v_CartItemId;
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UpdateCartItemQuantity` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UpdateCartItemQuantity`(
+    IN p_CartId INT,
+    IN p_ProductId INT,
+    IN p_NewQuantity INT
+)
+BEGIN
+    DECLARE v_CartItemId INT;
+    
+    -- MODIFIED: Find CartItemId using ProductId
+    SELECT CartItemId INTO v_CartItemId
+    FROM `CartItem_detail`
+    WHERE `CartId` = p_CartId AND `ProductId` = p_ProductId;
+
+    IF v_CartItemId IS NOT NULL THEN
+        IF p_NewQuantity > 0 THEN
+            -- Update quantity if new quantity is positive
+            UPDATE `CartItem_detail`
+            SET `Amount` = p_NewQuantity
+            WHERE `CartId` = p_CartId AND `CartItemId` = v_CartItemId;
+        ELSE
+            -- Remove item if new quantity is 0 or less
+            -- MODIFIED: Must delete from both tables (child first)
+            DELETE FROM `CartItem_detail` WHERE `CartId` = p_CartId AND `CartItemId` = v_CartItemId;
+            DELETE FROM `CartItem` WHERE `CartId` = p_CartId AND `CartItemId` = v_CartItemId;
+        END IF;
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+--
+-- WARNING: can't read the INFORMATION_SCHEMA.libraries table. It's most probably an old server 8.0.43.
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_UpdateOrderStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_UpdateOrderStatus`(
+    IN p_OrderId INT,
+    IN p_NewStatus VARCHAR(50)
+)
+BEGIN
+    UPDATE `Order`
+    SET `Status` = p_NewStatus
+    WHERE `OrderId` = p_OrderId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Final view structure for view `vw_TopBuyers`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_TopBuyers`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_TopBuyers` AS select `b`.`UserId` AS `UserId`,ifnull(sum(`oad`.`TotalAmount`),0) AS `TotalSpent` from (((`Buyer` `b` left join `Order` `o` on((`b`.`UserId` = `o`.`UserId`))) left join `OrderDetail` `od` on((`o`.`OrderId` = `od`.`OrderId`))) left join `Order_are_Detail` `oad` on(((`od`.`OrdDetail_id` = `oad`.`OrdDetail_id`) and (`od`.`OrderId` = `oad`.`OrderId`)))) group by `b`.`UserId` order by `TotalSpent` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_TopProducts`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_TopProducts`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_TopProducts` AS select `p`.`ProductId` AS `ProductId`,sum(`oad`.`Quantity`) AS `TotalSold` from (`Order_are_Detail` `oad` join `Product` `p` on((`oad`.`ProductId` = `p`.`ProductId`))) group by `p`.`ProductId` order by `TotalSold` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_TopSellingProducts`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vw_TopSellingProducts`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_TopSellingProducts` AS select `p`.`ProductId` AS `ProductId`,`p`.`Name` AS `Name`,sum(`oad`.`Quantity`) AS `TotalSold` from (`Order_are_Detail` `oad` join `Product` `p` on((`oad`.`ProductId` = `p`.`ProductId`))) group by `p`.`ProductId`,`p`.`Name` order by `TotalSold` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1008,4 +2039,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-08 10:25:50
+-- Dump completed on 2025-11-14  7:52:05

@@ -13,7 +13,7 @@ CORS(app)
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Daubu055@',
+    'password': '25082005',
     'database': 'pharmacy'
 }
 
@@ -304,10 +304,7 @@ def register():
 
         hashed = hash_password(password)
 
-        insert_sql = '''
-            INSERT INTO User (Fname, Lname, Email, Username, HashedPassword, Dob, Address)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        '''
+        insert_sql = "CALL sp_AddBuyerAccount(%s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(insert_sql, (fname, lname, email, username, hashed, dob, address))
         connection.commit()
 
@@ -383,12 +380,20 @@ def login():
 @app.route('/list_products', methods=['GET'])
 def list_products():
     """Lấy danh sách sản phẩm"""
+
+    category_id = request.args.get('category_id', type=int)
+
     connection = None
     cursor = None
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
-        cursor.execute('SELECT * FROM Product')
+        if category_id == 'all' or category_id is None:
+            query = 'CALL sp_GetAllProducts()'
+            cursor.execute(query)
+        else:
+            query = 'CALL sp_GetProductsByCategory(%s)'
+            cursor.execute(query, (category_id,))
         products = cursor.fetchall()
         return jsonify(products), 200
     except Exception as e:
@@ -405,40 +410,54 @@ def update_product():
     connection = None
     cursor = None
     try:
-        data = request.get_json() or {}
-        product_id = data.get('product_id')
+        data = request.get_json()
+        print(data)
+        product_id = data.get('ProductId')
+        name = data.get('Name')
+        price = data.get('Price')
+        stock = data.get('Stock')
+        description = data.get('Description')
+        category_id = int(data.get('CategoryId'))
         
-        if not product_id:
-            return jsonify({'error': 'Product ID required'}), 400
+        if not product_id or not name or price is None or stock is None or category_id is None:
+            return jsonify({'error': 'Please fill in the required fields'}), 400
         
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
-        
-        update_sql = 'UPDATE Product SET '
-        params = []
-        updates = []
-        
-        if 'name' in data:
-            updates.append('Name = %s')
-            params.append(data['name'])
-        if 'price' in data:
-            updates.append('Price = %s')
-            params.append(data['price'])
-        if 'stock' in data:
-            updates.append('Stock = %s')
-            params.append(data['stock'])
-        if 'description' in data:
-            updates.append('Description = %s')
-            params.append(data['description'])
-        
-        if not updates:
-            return jsonify({'error': 'No fields to update'}), 400
-        
-        update_sql += ', '.join(updates) + ' WHERE ProductId = %s'
-        params.append(product_id)
-        
-        cursor.execute(update_sql, params)
+
+        query = "CALL sp_UpdateProduct(%s, %s, %s, %s, %s, %s)"
+
+        cursor.execute(query, (product_id, name, price, stock, description, category_id))
         connection.commit()
+        
+        # update_sql = 'UPDATE Product SET '
+        # params = []
+        # updates = []
+        
+        # if 'name' in data:
+        #     updates.append('Name = %s')
+        #     params.append(data['name'])
+        # if 'price' in data:
+        #     updates.append('Price = %s')
+        #     params.append(data['price'])
+        # if 'stock' in data:
+        #     updates.append('Stock = %s')
+        #     params.append(data['stock'])
+        # if 'description' in data:
+        #     updates.append('Description = %s')
+        #     params.append(data['description'])
+        # if 'category_id' in data:
+        #     updates.append('CategoryId = %s')
+        #     params.append(data['category_id'])
+
+        # if not updates:
+        #     return jsonify({'error': 'No fields to update'}), 400
+        
+        # update_sql += ', '.join(updates) + ' WHERE ProductId = %s'
+        # params.append(product_id)
+        
+        # cursor.execute(update_sql, params)
+        # connection.commit()
         
         return jsonify({'success': True, 'message': 'Product updated'}), 200
     except Exception as e:
@@ -468,6 +487,58 @@ def delete_product(product_id):
         if connection:
             connection.close()
 
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    """Thêm sản phẩm mới"""
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        data = request.get_json()
+
+        name = data.get('Name')
+        description = data.get('Description')
+        price = float(data.get('Price'))
+        stock = int(data.get('Stock'))
+        category_id = int(data.get('CategoryId'))
+
+        if not name or not description or price is None or stock is None:
+            return jsonify({'error': 'Missing required fields.'}), 400
+
+        query = "CALL sp_AddProduct(%s, %s, %s, %s, %s)"
+        cursor.execute(query, (name, price, stock, description, category_id))
+        connection.commit()
+
+        newid = cursor.lastrowid
+
+        return jsonify({'message': f'Product added successfully to category ID {category_id} with ID: {newid}.'}), 201
+    except Exception as e:
+        print(f"Error adding product: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+@app.route('/categories')
+def get_categories():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute('SELECT CategoryId, Name FROM Category')
+        categories = cursor.fetchall()
+        category_list = [{'CategoryId': row[0], 'Name': row[1]} for row in categories]
+        return jsonify(category_list), 200
+    except Exception as e:
+        print(f"Error fetching categories: {e}")
+        return jsonify({'error': str(e)}), 500
 
 ######CART#######
 def get_or_create_cart(user_id):
@@ -574,39 +645,18 @@ def add_to_cart():
         if product['Stock'] < quantity:
             return jsonify({'error': f'Chỉ còn {product["Stock"]} sản phẩm'}), 400
         
-        # Lấy hoặc tạo cart
-        cart_id = get_or_create_cart(user_id)
+        # # Lấy hoặc tạo cart
+        # cart_id = get_or_create_cart(user_id)
         
         # Kiểm tra sản phẩm đã có trong cart chưa
-        cursor.execute(
-            'SELECT CartItemId, Quantity FROM CartItem WHERE CartId = %s AND ProductId = %s',
-            (cart_id, product_id)
-        )
-        cart_item = cursor.fetchone()
-        
-        if cart_item:
-            # Cập nhật số lượng
-            new_quantity = cart_item['Quantity'] + quantity
-            if product['Stock'] < new_quantity:
-                return jsonify({'error': f'Chỉ còn {product["Stock"]} sản phẩm'}), 400
-            
-            cursor.execute(
-                'UPDATE CartItem SET Quantity = %s WHERE CartItemId = %s',
-                (new_quantity, cart_item['CartItemId'])
-            )
-        else:
-            # Thêm sản phẩm mới
-            cursor.execute(
-                'INSERT INTO CartItem (CartId, ProductId, Quantity) VALUES (%s, %s, %s)',
-                (cart_id, product_id, quantity)
-            )
-        
+        cursor.callproc('sp_AddProductToCart', (user_id, product_id, quantity))
+
         connection.commit()
         
         return jsonify({
             'success': True,
             'message': 'Thêm vào giỏ hàng thành công',
-            'cart_id': cart_id
+            'user_id': user_id
         }), 200
     
     except mysql.connector.Error as db_err:
