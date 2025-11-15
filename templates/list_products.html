@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Products - Admin</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <h3 style="text-align: center; font-size: 2em; margin-bottom: 20px; color: #333;">Available Products</h3>
+        <div style="text-align:center; margin-bottom:30px; padding: 15px; border: 1px solid #333; border-radius: 8px;">
+            <input type="text" class="product-search" placeholder="Enter product name to search" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 400px;">
+            <button id="search-product-btn" style="padding: 10px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
+            <br>
+            <a href="./new_product_form.html" style="margin-top: 15px; display: inline-block; color: #667eea; text-decoration: none; font-weight: 600;">
+                <i class="fas fa-plus-circle"></i> Add a new product
+            </a>
+        </div>
+    </div>
+    
+    <main style="background-color: #6f85dfff; padding-bottom: 50px;">
+        <div id="category-filter-panel" class="category-panel" style="max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+        </div>
+        <div id="product-list" class="product-list">
+        </div>
+    </main>
+
+    <script src="../static/list_products.js"></script>
+</body>
+</html>
