@@ -80,9 +80,6 @@ body {
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
-<<<<<<< Updated upstream:static/style.css
-/* --- MAIN NAVIGATION (Categories) --- */
-=======
 .category-filter-panel {
     background-color: #007bff; 
     padding: 10px 0;
@@ -112,7 +109,6 @@ body {
     border-radius: 5px;
 }
 
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/style.css
 .main-nav {
     background-color: #007bff; 
     padding: 10px 0;
@@ -127,27 +123,6 @@ body {
     list-style: none;
 }
 
-<<<<<<< Updated upstream:static/style.css
-.main-nav-list li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 8px 15px;
-    display: block;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-}
-
-.main-nav-list li a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
-}
-
-/* Thêm kiểu cho dropdown menu nếu cần */
-/* .main-nav-list li.has-submenu { position: relative; } */
-/* .main-nav-list li.has-submenu .submenu { display: none; position: absolute; ... } */
-/* .main-nav-list li.has-submenu:hover .submenu { display: block; } */
-=======
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/style.css
 
 @media (max-width: 768px) {
     .header-top {
@@ -238,14 +213,11 @@ body {
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Responsive grid */
+    grid-template-columns: repeat(5, 1fr); 
     gap: 25px;
-<<<<<<< Updated upstream:static/style.css
-=======
     max-width: 1200px; 
     
     margin: 0 auto;
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/style.css
 }
 
 .product-card {
@@ -255,12 +227,8 @@ body {
     padding: 15px;
     text-align: center;
     transition: transform 0.2s ease;
-<<<<<<< Updated upstream:static/style.css
-=======
     
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/style.css
 }
-
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -309,8 +277,6 @@ body {
 
 .btn-add-to-cart:hover {
     background-color: #0056b3;
-<<<<<<< Updated upstream:static/style.css
-=======
 }
 
 .login-card {
@@ -689,5 +655,4 @@ body {
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
     width: 90%;
     max-width: 500px;
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/style.css
 }

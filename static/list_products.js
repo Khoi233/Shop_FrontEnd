@@ -1,8 +1,6 @@
-let allProducts = [];
-<<<<<<< Updated upstream:static/list_products.js
+const API_BASE = 'http://127.0.0.1:5001';
 
-const createUpdateForm = (product) => {
-=======
+let allProducts = [];
 let activeCategoryId = 'all';
 let categories = [];
 
@@ -73,7 +71,6 @@ const renderCategoryButtons = (categories) => {
 
 const createUpdateForm = async (product) => {
     // Xoá form cũ nếu có
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
     document.getElementById('update-form-container')?.remove();
 
     const formContainer = document.createElement('div');
@@ -81,27 +78,19 @@ const createUpdateForm = async (product) => {
     formContainer.className = 'update-form';
 
     formContainer.innerHTML = `
-<<<<<<< Updated upstream:static/list_products.js
-    <div class="update-form-modal">
-            <h3>Update product: ${product.Name} (ID: ${product.ID})</h3>
-=======
         <div class="update-form-modal">
             <h3>Update product: ${product.Name} (ID: ${product.ProductId})</h3>
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
             <form id="product-update-form">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" value="${product.Name}" required><br>
                 
                 <label for="description">Description:</label>
                 <textarea id="description" name="description" required>${product.Description}</textarea><br>
-<<<<<<< Updated upstream:static/list_products.js
-=======
                 
                 <label for="category">Category:</label>
                 <select id="category" name="category" required>
                     <option value="" disabled>Select category</option>
                 </select><br>
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
 
                 <label for="price">Price:</label>
                 <input type="number" id="price" name="price"
@@ -119,8 +108,6 @@ const createUpdateForm = async (product) => {
 
     document.body.appendChild(formContainer);
 
-<<<<<<< Updated upstream:static/list_products.js
-=======
     try {
         // Đảm bảo đã có categories (gọi lại cho chắc, hoặc bỏ đi nếu đã fetch ở ngoài)
         if (!categories || categories.length === 0) {
@@ -148,7 +135,6 @@ const createUpdateForm = async (product) => {
         console.error('Error setting product category: ', err);
     }
 
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
     document.getElementById('cancel-update-btn').addEventListener('click', () => {
         formContainer.remove();
     });
@@ -162,16 +148,18 @@ const createUpdateForm = async (product) => {
 
 const handleUpdateSubmit = async (productId, formContainer) => {
     const form = document.getElementById('product-update-form');
+
     const updatedData = {
         Description: form.description.value,
         Name: form.name.value,
         Price: parseFloat(form.price.value),
         ProductId: productId,
-        Stock: parseInt(form.stock.value)
+        Stock: parseInt(form.stock.value),
+        CategoryId: form.category.value
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/update_product', {
+        const response = await fetch(`${API_BASE}/update_product`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -195,21 +183,6 @@ const handleUpdateSubmit = async (productId, formContainer) => {
     }
 }
 
-const loadProducts = async () => {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/list_products');
-        if (!response.ok) throw new Error('Failed to fetch products.');
-
-        const products = await response.json();
-        allProducts = products;
-        renderProducts(products);
-    }
-    catch (err) {
-        console.error('Error loading products: ', err);
-        document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
-    }
-};
-
 const renderProducts = (products) => {
     console.log("Rendering...");
     const container = document.getElementById('product-list');
@@ -230,14 +203,6 @@ const renderProducts = (products) => {
         card.className = 'product-card';
 
         card.innerHTML = `
-<<<<<<< Updated upstream:static/list_products.js
-        <div className="product-details">
-            <div class="product-id">ID: ${product.ProductId}</div>
-            <div class="product-name">Name: ${product.Name}</div>
-            <div class="product-description">Description: ${product.Description}</div>
-            <div class="product-price">Price: ${product.Price}</div>
-            <div class="product-stock">Remaining stock: ${product.Stock}</div>
-=======
         <div class="product-header">
             <h4>${product.Name}</h4>
             <span class="product-id">ID: ${product.ProductId}</span>
@@ -255,7 +220,6 @@ const renderProducts = (products) => {
         </div>
 
         <div class="product-actions">
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
             <button class="product-update-btn">Update product information</button>
             <button class="product-delete-btn">Delete</button>
         </div>
@@ -275,15 +239,31 @@ const renderProducts = (products) => {
     })
 }
 
+const filterByCategory = (categoryId) => {
+    activeCategoryId = (categoryId === 'all') ? null : parseInt(categoryId);
+
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.querySelector(`[data-category-id="${categoryId}"]`).classList.add('active');
+
+    document.querySelector('.product-search').value = '';
+
+    loadProductsByCategory(categoryId);
+}
+
 const filterProducts = () => {
     const searchInput = document.querySelector('.product-search').value.trim().toLowerCase();
+
+    let filteredProducts = allProducts;
 
     if (!searchInput) {
         renderProducts(allProducts);
         return;
     }
 
-    const filteredProducts = allProducts.filter(p => 
+    filteredProducts = allProducts.filter(p => 
         p.Name.toLowerCase().includes(searchInput)
     );
 
@@ -321,7 +301,7 @@ const confirmDeletion = (product) => {
 
 const handleProductDeletion = async (productId, confirmationContainer) => {
     try {
-        const response = await fetch(`http://127.0.0.1:5000/delete_product/${productId}`, {
+        const response = await fetch(`${API_BASE}/delete_product/${productId}`, {
             method: 'DELETE',
         });
 
@@ -341,19 +321,6 @@ const handleProductDeletion = async (productId, confirmationContainer) => {
     }
 }
 
-<<<<<<< Updated upstream:static/list_products.js
-document.addEventListener("DOMContentLoaded", () => {
-    loadProducts();
-
-    const searchBtn = document.getElementById('search-product-btn');
-    searchBtn.addEventListener('click', filterProducts);
-
-    const newProductBtn = document.getElementById('new-product-btn');
-    newProductBtn.addEventListener('click', () => {
-        location.href = "new_product_form.html";
-    })
-})
-=======
 document.addEventListener("DOMContentLoaded", async () => {
     const ok = await checkAdminAccess();
     if (!ok) return;  
@@ -395,4 +362,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     const searchBtn = document.getElementById('search-product-btn');
     searchBtn.addEventListener('click', filterProducts);
 });
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js

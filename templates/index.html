@@ -15,25 +15,14 @@
                 <img src="images/logo_e_shop.png" alt="E-Shop Logo">
             </a>
             <div class="search-bar">
-                <input type="text" placeholder="Tìm kiếm sản phẩm...">
-                <button><i class="fas fa-search"></i></button>
+                <input type="text" placeholder="Tìm kiếm sản phẩm..." class="search-input">
+                <button><i class="fas fa-search" id="search-btn"></i></button>
             </div>
             <div class="header-actions">
                 <a href="cart.html" class="action-item">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Giỏ hàng</span>
                 </a>
-<<<<<<< Updated upstream:templates/index.html
-                <a href="login_register.html" class="action-item">
-                    <i class="fas fa-user"></i>
-                    <span>Đăng nhập</span>
-                </a>
-                <a href="./list_products.html" class="product-list">
-                    <i class="fas fa-products-list"></i>
-                    <span>List of products</span>
-                </a>
-                <!-- Có thể thêm nút "Đăng ký" riêng hoặc ẩn/hiện tùy trạng thái đăng nhập -->
-=======
                 
                 <div id="auth-status" class="action-item">
                     <a href="login_register.html" id="login-link" class="action-item">
@@ -41,20 +30,10 @@
                         <span>Đăng nhập</span>
                     </a>
                 </div>
->>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/templates/index.html
             </div>
         </div>
-        <nav class="main-nav">
-            <ul class="main-nav-list">
-                <li><a href="#">Tất cả sản phẩm</a></li>
-                <li><a href="#">Dược phẩm</a></li>
-                <li><a href="#">Chăm sóc cá nhân</a></li>
-                <li><a href="#">Sức khỏe & Sắc đẹp</a></li>
-                <li><a href="#">Mẹ & Bé</a></li>
-                <li><a href="#">Vật tư y tế</a></li>
-                <!-- Thêm các Category từ bảng Category của bạn -->
-            </ul>
-        </nav>
+        <div id="category-filter-panel" class="category-filter-panel">
+        </div>
     </header>
 
     <main>
@@ -64,22 +43,8 @@
 
         <section class="products-section">
             <div class="container">
-                <h2>Sản phẩm nổi bật</h2>
-                <div class="product-grid">
-                    <!-- Các thẻ sản phẩm sẽ được render ở đây -->
-                    <div class="product-card">
-                        <img src="images/product_placeholder.png" alt="Tên sản phẩm">
-                        <h3><a href="product_detail.html">Sản phẩm A</a></h3>
-                        <p class="price">250.000 VNĐ</p>
-                        <button class="btn-add-to-cart">Thêm vào giỏ</button>
-                    </div>
-                    <div class="product-card">
-                        <img src="images/product_placeholder.png" alt="Tên sản phẩm">
-                        <h3><a href="product_detail.html">Sản phẩm B</a></h3>
-                        <p class="price">120.000 VNĐ</p>
-                        <button class="btn-add-to-cart">Thêm vào giỏ</button>
-                    </div>
-                    <!-- Thêm nhiều sản phẩm khác -->
+                <h2>Sản phẩm hiện có</h2>
+                <div class="product-grid" id="product-grid">
                 </div>
             </div>
         </section>
