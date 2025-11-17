@@ -1,29 +1,115 @@
 let allProducts = [];
+<<<<<<< Updated upstream:static/list_products.js
 
 const createUpdateForm = (product) => {
+=======
+let activeCategoryId = 'all';
+let categories = [];
+
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(amount);
+};
+
+const loadProductsByCategory = async (categoryId) => {
+    activeCategoryId = categoryId;
+
+    try {
+        const response = await fetch(`${API_BASE}/list_products?category_id=${categoryId}`);
+        if (!response.ok) throw new Error('Failed to fetch products.');
+
+        const products = await response.json();
+        allProducts = products;
+
+        document.querySelector('.product-search').value = '';
+
+        renderProducts(products);
+    }
+    catch (err) {
+        console.error('Error loading products: ', err);
+        document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
+    }
+};
+
+
+const fetchCategories = async () => { 
+    try {
+        const response = await fetch(`${API_BASE}/categories`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch categories. Status ${response.status}`);
+        }
+        categories = await response.json();
+        renderCategoryButtons(categories);
+    }
+    catch (err) {
+        console.error('Error fetching categories: ', err);
+        // Có thể thêm thông báo lỗi trên UI cho category filter panel
+    }
+}
+
+const renderCategoryButtons = (categories) => {
+    const panel = document.getElementById('category-filter-panel');
+    panel.innerHTML = '<button id="category-all" data-category-id="all" class="category-btn active">All Products</button>';
+
+    categories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'category-btn';
+        button.id = `category-${category.CategoryId}`;
+        button.setAttribute('data-category-id', category.CategoryId);
+        button.textContent = category.Name;
+        panel.appendChild(button);
+    });
+
+    panel.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const categoryId = e.target.getAttribute('data-category-id');
+            filterByCategory(categoryId);
+        })
+    });
+}
+
+const createUpdateForm = async (product) => {
+    // Xoá form cũ nếu có
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
     document.getElementById('update-form-container')?.remove();
 
     const formContainer = document.createElement('div');
-
     formContainer.id = 'update-form-container';
-
     formContainer.className = 'update-form';
 
     formContainer.innerHTML = `
+<<<<<<< Updated upstream:static/list_products.js
     <div class="update-form-modal">
             <h3>Update product: ${product.Name} (ID: ${product.ID})</h3>
+=======
+        <div class="update-form-modal">
+            <h3>Update product: ${product.Name} (ID: ${product.ProductId})</h3>
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
             <form id="product-update-form">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" value="${product.Name}" required><br>
                 
                 <label for="description">Description:</label>
                 <textarea id="description" name="description" required>${product.Description}</textarea><br>
+<<<<<<< Updated upstream:static/list_products.js
+=======
+                
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled>Select category</option>
+                </select><br>
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
 
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" value="${product.Price}" min="0" step="0.01" required><br>
+                <input type="number" id="price" name="price"
+                       value="${product.Price}" min="0" step="0.01" required><br>
 
                 <label for="stock">Remaining Stock:</label>
-                <input type="number" id="stock" name="stock" min="0" value="${product.Stock}" required><br>
+                <input type="number" id="stock" name="stock"
+                       min="0" value="${product.Stock}" required><br>
 
                 <button type="submit" id="confirm-changes-btn">Confirm Changes</button>
                 <button type="button" id="cancel-update-btn">Cancel</button>
@@ -33,6 +119,36 @@ const createUpdateForm = (product) => {
 
     document.body.appendChild(formContainer);
 
+<<<<<<< Updated upstream:static/list_products.js
+=======
+    try {
+        // Đảm bảo đã có categories (gọi lại cho chắc, hoặc bỏ đi nếu đã fetch ở ngoài)
+        if (!categories || categories.length === 0) {
+            await fetchCategories();
+        }
+
+        const categorySelect = document.getElementById('category');
+
+        // Xoá option cũ (trừ placeholder)
+        categorySelect.innerHTML = '<option value="" disabled>Select category</option>';
+
+        // Đổ options từ mảng categories
+        categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.CategoryId;
+            opt.textContent = cat.Name;
+            // chọn category hiện tại của product
+            if (String(cat.CategoryId) === String(product.CategoryId)) {
+                opt.selected = true;
+            }
+            categorySelect.appendChild(opt);
+        });
+
+    } catch (err) {
+        console.error('Error setting product category: ', err);
+    }
+
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
     document.getElementById('cancel-update-btn').addEventListener('click', () => {
         formContainer.remove();
     });
@@ -41,7 +157,8 @@ const createUpdateForm = (product) => {
         event.preventDefault();
         handleUpdateSubmit(product.ProductId, formContainer);
     });
-}
+};
+
 
 const handleUpdateSubmit = async (productId, formContainer) => {
     const form = document.getElementById('product-update-form');
@@ -68,13 +185,13 @@ const handleUpdateSubmit = async (productId, formContainer) => {
         }
 
         alert('Product updated successfully!');
-        formContainer.remove(); // Close form
-        loadProducts(); // Reload products to show updated data
+        formContainer.remove(); 
+        loadProductsByCategory(activeCategoryId);
     }
     catch (err) {
         console.error('Error updating product: ', err);
         alert(`Update failed: ${err.message}`);
-        formContainer.remove(); // Close form
+        formContainer.remove();
     }
 }
 
@@ -102,18 +219,43 @@ const renderProducts = (products) => {
         container.innerHTML = '<p style="text-align:center;">No products found.</p>';
         return;
     }
+    
+    const listContainer = document.createElement('div');
+    listContainer.className = 'product-list-container';
+    container.appendChild(listContainer);
+
 
     products.forEach((product) => {
         const card = document.createElement('div');
         card.className = 'product-card';
 
         card.innerHTML = `
+<<<<<<< Updated upstream:static/list_products.js
         <div className="product-details">
             <div class="product-id">ID: ${product.ProductId}</div>
             <div class="product-name">Name: ${product.Name}</div>
             <div class="product-description">Description: ${product.Description}</div>
             <div class="product-price">Price: ${product.Price}</div>
             <div class="product-stock">Remaining stock: ${product.Stock}</div>
+=======
+        <div class="product-header">
+            <h4>${product.Name}</h4>
+            <span class="product-id">ID: ${product.ProductId}</span>
+        </div>
+        
+        <div class="product-description-box">
+            ${product.Description}
+        </div>
+
+        <div class="product-info-grid">
+            <div><strong>Giá:</strong> ${formatCurrency(product.Price)}</div>
+            <div><strong>Tồn kho:</strong> ${product.Stock}</div>
+            <div><strong>Category ID:</strong> ${product.CategoryId}</div>
+            <!-- Có thể thêm Category Name sau -->
+        </div>
+
+        <div class="product-actions">
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js
             <button class="product-update-btn">Update product information</button>
             <button class="product-delete-btn">Delete</button>
         </div>
@@ -129,7 +271,7 @@ const renderProducts = (products) => {
             confirmDeletion(product);
         })
 
-        container.appendChild(card);
+        listContainer.appendChild(card);
     })
 }
 
@@ -183,9 +325,8 @@ const handleProductDeletion = async (productId, confirmationContainer) => {
             method: 'DELETE',
         });
 
-        if (!response.ok) throw new Error(`Failed to delete product ${productId}`);
+        if (!response.ok) throw new Error(`${response.error}`);
 
-        // Optionally get response text or JSON
         const result = await response.json();
         console.log(result.message);
 
@@ -200,6 +341,7 @@ const handleProductDeletion = async (productId, confirmationContainer) => {
     }
 }
 
+<<<<<<< Updated upstream:static/list_products.js
 document.addEventListener("DOMContentLoaded", () => {
     loadProducts();
 
@@ -211,3 +353,46 @@ document.addEventListener("DOMContentLoaded", () => {
         location.href = "new_product_form.html";
     })
 })
+=======
+document.addEventListener("DOMContentLoaded", async () => {
+    const ok = await checkAdminAccess();
+    if (!ok) return;  
+
+    await fetchCategories();
+    await loadProductsByCategory('all');
+
+    const searchBtn = document.getElementById('search-product-btn');
+    searchBtn.addEventListener('click', filterProducts);
+});
+
+// trong list_products.js
+async function checkAdminAccess() {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+        alert('Bạn cần đăng nhập bằng tài khoản Admin / Store Manager');
+        window.location.href = '/';
+        return false;
+    }
+
+    const res = await fetch(`${API_BASE}/api/auth/check-admin?user_id=${userId}`);
+    const data = await res.json();
+
+    if (!data.is_admin && !data.is_sales_manager) {
+        alert('Bạn không có quyền truy cập trang quản lý sản phẩm.');
+        window.location.href = '/';
+        return false;
+    }
+    return true;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const ok = await checkAdminAccess();
+    if (!ok) return;
+
+    fetchCategories();
+    loadProductsByCategory('all');
+
+    const searchBtn = document.getElementById('search-product-btn');
+    searchBtn.addEventListener('click', filterProducts);
+});
+>>>>>>> Stashed changes:OneDrive/Máy tính/Shop1/Shop_FrontEnd/static/list_products.js

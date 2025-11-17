@@ -10,9 +10,8 @@
 </head>
 <body>
     <header class="header">
-        <!-- Header chung của website (copy từ index.html) -->
         <div class="header-top">
-            <a href="index.html" class="logo">
+            <a href="{{ url_for('index_page') }}" class="logo">
                 <img src="images/logo_e_shop.png" alt="E-Shop Logo">
             </a>
             <div class="search-bar">
@@ -30,16 +29,6 @@
                 </a>
             </div>
         </div>
-        <nav class="main-nav">
-            <ul class="main-nav-list">
-                <li><a href="#">Tất cả sản phẩm</a></li>
-                <li><a href="#">Dược phẩm</a></li>
-                <li><a href="#">Chăm sóc cá nhân</a></li>
-                <li><a href="#">Sức khỏe & Sắc đẹp</a></li>
-                <li><a href="#">Mẹ & Bé</a></li>
-                <li><a href="#">Vật tư y tế</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main class="login-page-main">
@@ -49,7 +38,6 @@
                 <button class="tab-button" data-tab="register">Đăng ký</button>
             </div>
 
-            <!-- Form Đăng nhập -->
             <form id="login-form" class="auth-form active">
                 <h3>Đăng nhập tài khoản</h3>
                 <div class="form-group">
@@ -68,16 +56,8 @@
                     <a href="#" class="forgot-password">Quên mật khẩu?</a>
                 </div>
                 <button type="submit" class="btn btn-primary">Đăng nhập</button>
-                <div class="social-login">
-                    <span>Hoặc đăng nhập bằng</span>
-                    <div class="social-icons">
-                        <a href="#" class="social-icon google"><i class="fab fa-google"></i> Google</a>
-                        <a href="#" class="social-icon facebook"><i class="fab fa-facebook-f"></i> Facebook</a>
-                    </div>
-                </div>
             </form>
 
-            <!-- Form Đăng ký -->
             <form id="register-form" class="auth-form">
                 <h3>Đăng ký tài khoản mới</h3>
                 <div class="form-group">
@@ -118,13 +98,20 @@
     </main>
 
     <footer class="footer">
-        <!-- Footer chung của website (copy từ index.html) -->
         <div class="container">
             <p>&copy; 2023 E-Shop. All rights reserved.</p>
             <div class="footer-links">
                 <a href="#">Về chúng tôi</a> |
                 <a href="#">Chính sách bảo mật</a> |
-                <a href="#">Liên hệ</a>
+                <a href="#">Liên hệ</a> |
+                
+                <a href="./list_products.html" style="color: #667eea;">
+                    <i class="fas fa-list-alt"></i> Quản lý Sản phẩm
+                </a> |
+
+                <a href="./admin_login.html" style="color: #667eea; font-weight: bold;">
+                    <i class="fas fa-user-shield"></i> Admin Login
+                </a>
             </div>
         </div>
     </footer>
