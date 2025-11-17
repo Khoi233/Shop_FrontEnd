@@ -226,5 +226,5 @@ const checkout = () => {
 
 // Tiếp tục mua sắm
 const continueShopping = () => {
-    window.location.href = './list_products.html';
+    window.location.href = './index.html';
 };
