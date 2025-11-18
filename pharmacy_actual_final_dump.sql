@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `pharmacy` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `pharmacy`;
--- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
 -- Host: localhost    Database: pharmacy
 -- ------------------------------------------------------
--- Server version	8.0.43
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -107,7 +107,8 @@ CREATE TABLE `buyer` (
   `UserId` int NOT NULL,
   `LoyaltyPoint` int DEFAULT '0',
   PRIMARY KEY (`UserId`),
-  CONSTRAINT `Buyer_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`UserId`)
+  CONSTRAINT `Buyer_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`UserId`),
+  CONSTRAINT `chk_loyalty_point` CHECK ((`LoyaltyPoint` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -234,7 +235,7 @@ DROP TABLE IF EXISTS `category`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `category` (
   `CategoryId` int NOT NULL AUTO_INCREMENT,
-  `Name` varchar(50) DEFAULT NULL,
+  `Name` varchar(50) NOT NULL,
   `Description` text,
   PRIMARY KEY (`CategoryId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -315,12 +316,13 @@ DROP TABLE IF EXISTS `order`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `order` (
   `OrderId` int NOT NULL AUTO_INCREMENT,
-  `Status` varchar(50) DEFAULT NULL,
-  `OrderDate` date DEFAULT NULL,
+  `Status` varchar(50) NOT NULL,
+  `OrderDate` date NOT NULL,
   `UserId` int NOT NULL,
   PRIMARY KEY (`OrderId`),
   KEY `UserId` (`UserId`),
-  CONSTRAINT `Order_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`UserId`)
+  CONSTRAINT `Order_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`UserId`),
+  CONSTRAINT `chk_order_status` CHECK ((`Status` in (_utf8mb4'Pending',_utf8mb4'Completed',_utf8mb4'Cancelled')))
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -377,12 +379,13 @@ CREATE TABLE `order_are_detail` (
   `OrdDetail_id` int NOT NULL,
   `OrderId` int NOT NULL,
   `ProductId` int NOT NULL,
-  `Quantity` int DEFAULT NULL,
-  `TotalAmount` decimal(10,2) NOT NULL COMMENT 'The total price for this line item (Quantity * Price at time of purchase)',
+  `Quantity` int NOT NULL,
+  `TotalAmount` decimal(10,2) NOT NULL,
   PRIMARY KEY (`OrdDetail_id`,`OrderId`,`ProductId`),
   KEY `ProductId` (`ProductId`),
   CONSTRAINT `Order_are_Detail_ibfk_1` FOREIGN KEY (`OrdDetail_id`, `OrderId`) REFERENCES `orderdetail` (`OrdDetail_id`, `OrderId`),
-  CONSTRAINT `Order_are_Detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `product` (`ProductId`) ON DELETE CASCADE
+  CONSTRAINT `Order_are_Detail_ibfk_2` FOREIGN KEY (`ProductId`) REFERENCES `product` (`ProductId`) ON DELETE CASCADE,
+  CONSTRAINT `chk_order_detail_qty` CHECK ((`Quantity` > 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -587,9 +590,9 @@ DROP TABLE IF EXISTS `payment`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `payment` (
   `PaymentId` int NOT NULL AUTO_INCREMENT,
-  `PayDate` date DEFAULT NULL,
-  `Amount` decimal(10,2) DEFAULT NULL,
-  `Status` varchar(50) DEFAULT NULL,
+  `PayDate` date NOT NULL,
+  `Amount` decimal(10,2) NOT NULL,
+  `Status` varchar(50) NOT NULL,
   `Creation_Date` date DEFAULT NULL,
   `OrderId` int NOT NULL,
   PRIMARY KEY (`PaymentId`),
@@ -617,11 +620,15 @@ DROP TABLE IF EXISTS `product`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product` (
   `ProductId` int NOT NULL AUTO_INCREMENT,
-  `Price` decimal(10,2) DEFAULT NULL,
-  `Name` varchar(50) DEFAULT NULL,
-  `Stock` int DEFAULT NULL,
+  `ProductCode` varchar(20) DEFAULT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `Name` varchar(50) NOT NULL,
+  `Stock` int NOT NULL,
   `Description` text,
-  PRIMARY KEY (`ProductId`)
+  PRIMARY KEY (`ProductId`),
+  UNIQUE KEY `ProductCode` (`ProductCode`),
+  CONSTRAINT `chk_product_price` CHECK ((`Price` > 0)),
+  CONSTRAINT `chk_product_stock` CHECK ((`Stock` >= 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -631,9 +638,39 @@ CREATE TABLE `product` (
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
-INSERT INTO `product` VALUES (3,100000.00,'Paracetamol',460,'A common pain reliever and fever reducer. Used to treat headaches, muscle aches, arthritis, backache, and fever caused by infections.'),(4,70000.00,'Amoxicillin',231,'A broad-spectrum antibiotic used to treat bacterial infections such as pneumonia, ear infections, urinary tract infections, and throat infections.'),(5,123000.00,'Ibuprofen',312,'A nonsteroidal anti-inflammatory drug (NSAID) that helps reduce fever, pain, and inflammation. Commonly used for menstrual cramps, headaches, and arthritis.'),(6,50000.00,'Loratadine',195,'An antihistamine used to relieve allergy symptoms such as runny nose, sneezing, and itchy or watery eyes. It does not usually cause drowsiness.');
+INSERT INTO `product` VALUES (3,'PID003',100000.00,'Paracetamol',460,'A common pain reliever and fever reducer. Used to treat headaches, muscle aches, arthritis, backache, and fever caused by infections.'),(4,'PID004',70000.00,'Amoxicillin',231,'A broad-spectrum antibiotic used to treat bacterial infections such as pneumonia, ear infections, urinary tract infections, and throat infections.'),(5,'PID005',123000.00,'Ibuprofen',312,'A nonsteroidal anti-inflammatory drug (NSAID) that helps reduce fever, pain, and inflammation. Commonly used for menstrual cramps, headaches, and arthritis.'),(6,'PID006',50000.00,'Loratadine',195,'An antihistamine used to relieve allergy symptoms such as runny nose, sneezing, and itchy or watery eyes. It does not usually cause drowsiness.');
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_product_prefix` BEFORE INSERT ON `product` FOR EACH ROW BEGIN
+    DECLARE next_id INT;
+
+    -- Lấy ID tiếp theo nếu ProductId chưa được set (auto increment)
+    IF NEW.ProductId IS NULL THEN
+        SELECT AUTO_INCREMENT INTO next_id
+        FROM information_schema.TABLES
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'product';
+    ELSE
+        SET next_id = NEW.ProductId;
+    END IF;
+
+    -- Sinh mã dạng PIDxxx
+    SET NEW.ProductCode = CONCAT('PID', LPAD(next_id, 3, '0'));
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `promotion`
@@ -644,11 +681,12 @@ DROP TABLE IF EXISTS `promotion`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `promotion` (
   `PromoId` int NOT NULL AUTO_INCREMENT,
-  `Type` varchar(50) DEFAULT NULL,
-  `StartPeriod` date DEFAULT NULL,
-  `EndPeriod` date DEFAULT NULL,
-  `Value` decimal(10,2) DEFAULT NULL,
-  PRIMARY KEY (`PromoId`)
+  `Type` varchar(50) NOT NULL,
+  `StartPeriod` date NOT NULL,
+  `EndPeriod` date NOT NULL,
+  `Value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`PromoId`),
+  CONSTRAINT `chk_promo_period` CHECK ((`StartPeriod` <= `EndPeriod`))
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -689,27 +727,6 @@ LOCK TABLES `refer_id` WRITE;
 /*!40000 ALTER TABLE `refer_id` DISABLE KEYS */;
 /*!40000 ALTER TABLE `refer_id` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_prevent_self_referral` BEFORE INSERT ON `refer_id` FOR EACH ROW BEGIN
-    -- Không cho Referee (người được giới thiệu) trùng với Referrer (người giới thiệu)
-    IF NEW.Referee_Id = NEW.Referrer_Id THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error: A user cannot refer themselves.';
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `report`
@@ -796,8 +813,8 @@ DROP TABLE IF EXISTS `shipment`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `shipment` (
   `ShipmentId` int NOT NULL AUTO_INCREMENT,
-  `ShippingDate` date DEFAULT NULL,
-  `Status` varchar(50) DEFAULT NULL,
+  `ShippingDate` date NOT NULL,
+  `Status` varchar(50) NOT NULL,
   PRIMARY KEY (`ShipmentId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -849,10 +866,10 @@ DROP TABLE IF EXISTS `thirdparty`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `thirdparty` (
   `ThirdPartyId` int NOT NULL AUTO_INCREMENT,
-  `Name` varchar(100) DEFAULT NULL,
+  `Name` varchar(100) NOT NULL,
   `Website` varchar(255) DEFAULT NULL,
-  `Address` varchar(255) DEFAULT NULL,
-  `ContactInfo` varchar(255) DEFAULT NULL,
+  `Address` varchar(255) NOT NULL,
+  `ContactInfo` varchar(255) NOT NULL,
   PRIMARY KEY (`ThirdPartyId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -901,11 +918,11 @@ DROP TABLE IF EXISTS `user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
   `UserId` int NOT NULL AUTO_INCREMENT,
-  `Dob` date DEFAULT NULL,
-  `Address` varchar(255) DEFAULT NULL,
-  `Fname` varchar(50) DEFAULT NULL,
-  `Lname` varchar(50) DEFAULT NULL,
-  `Email` varchar(50) DEFAULT NULL,
+  `Dob` date NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  `Fname` varchar(50) NOT NULL,
+  `Lname` varchar(50) NOT NULL,
+  `Email` varchar(50) NOT NULL,
   `Username` varchar(50) NOT NULL,
   `HashedPassword` varchar(255) NOT NULL,
   PRIMARY KEY (`UserId`),
@@ -2229,110 +2246,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-17 20:34:35
-
--- PRODUCT
-ALTER TABLE product 
-MODIFY Name VARCHAR(50) NOT NULL,
-MODIFY Price DECIMAL(10,2) NOT NULL,
-MODIFY Stock INT NOT NULL;
-
--- CATEGORY
-ALTER TABLE category 
-MODIFY Name VARCHAR(50) NOT NULL;
-
--- USER
-ALTER TABLE user
-MODIFY Fname VARCHAR(50) NOT NULL,
-MODIFY Lname VARCHAR(50) NOT NULL,
-MODIFY Email VARCHAR(50) NOT NULL,
-MODIFY Dob DATE NOT NULL,
-MODIFY Address VARCHAR(255) NOT NULL;
-
--- ORDER
-ALTER TABLE `order`
-MODIFY Status VARCHAR(50) NOT NULL,
-MODIFY OrderDate DATE NOT NULL;
-
--- ORDER_ARE_DETAIL
-ALTER TABLE order_are_detail
-MODIFY Quantity INT NOT NULL,
-MODIFY TotalAmount DECIMAL(10,2) NOT NULL;
-
--- PAYMENT
-ALTER TABLE payment
-MODIFY PayDate DATE NOT NULL,
-MODIFY Amount DECIMAL(10,2) NOT NULL,
-MODIFY Status VARCHAR(50) NOT NULL;
-
--- PROMOTION
-ALTER TABLE promotion
-MODIFY Type VARCHAR(50) NOT NULL,
-MODIFY Value DECIMAL(10,2) NOT NULL,
-MODIFY StartPeriod DATE NOT NULL,
-MODIFY EndPeriod DATE NOT NULL;
-
--- SHIPMENT
-ALTER TABLE shipment
-MODIFY ShippingDate DATE NOT NULL,
-MODIFY Status VARCHAR(50) NOT NULL;
-
--- THIRD PARTY
-ALTER TABLE thirdparty
-MODIFY Name VARCHAR(100) NOT NULL,
-MODIFY Address VARCHAR(255) NOT NULL,
-MODIFY ContactInfo VARCHAR(255) NOT NULL;
-
-ALTER TABLE product
-ADD ProductCode VARCHAR(20) UNIQUE AFTER ProductId;
-
-DELIMITER ;;
-
-CREATE TRIGGER trg_product_prefix
-BEFORE INSERT ON product
-FOR EACH ROW
-BEGIN
-    DECLARE next_id INT;
-
-    -- Lấy ID tiếp theo nếu ProductId chưa được set (auto increment)
-    IF NEW.ProductId IS NULL THEN
-        SELECT AUTO_INCREMENT INTO next_id
-        FROM information_schema.TABLES
-        WHERE TABLE_SCHEMA = DATABASE()
-          AND TABLE_NAME = 'product';
-    ELSE
-        SET next_id = NEW.ProductId;
-    END IF;
-
-    -- Sinh mã dạng PIDxxx
-    SET NEW.ProductCode = CONCAT('PID', LPAD(next_id, 3, '0'));
-END;;
-
-DELIMITER ;
-
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE product
-SET ProductCode = CONCAT('PID', LPAD(ProductId, 3, '0'));
-
-SET SQL_SAFE_UPDATES = 1;
-
-ALTER TABLE product
-ADD CONSTRAINT chk_product_stock CHECK (Stock >= 0);
-
-ALTER TABLE product
-ADD CONSTRAINT chk_product_price CHECK (Price > 0);
-
-ALTER TABLE `order`
-ADD CONSTRAINT chk_order_status CHECK (Status IN ('Pending', 'Completed', 'Cancelled'));
-
-ALTER TABLE promotion
-ADD CONSTRAINT chk_promo_period CHECK (StartPeriod <= EndPeriod);
-
-ALTER TABLE buyer
-ADD CONSTRAINT chk_loyalty_point CHECK (LoyaltyPoint >= 0);
-
-ALTER TABLE order_are_detail
-ADD CONSTRAINT chk_order_detail_qty CHECK (Quantity > 0);
-
-drop trigger if exists pharmacy.trg_prevent_self_referral
+-- Dump completed on 2025-11-18 12:34:32

@@ -4,6 +4,9 @@ let allProducts = [];
 let activeCategoryId = 'all';
 let categories = [];
 
+
+const userId = localStorage.getItem('user_id');
+
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -32,7 +35,7 @@ const loadProductsByCategory = async (categoryId) => {
 };
 
 
-const fetchCategories = async () => { 
+const fetchCategories = async () => {
     try {
         const response = await fetch(`${API_BASE}/categories`);
 
@@ -173,7 +176,7 @@ const handleUpdateSubmit = async (productId, formContainer) => {
         }
 
         alert('Product updated successfully!');
-        formContainer.remove(); 
+        formContainer.remove();
         loadProductsByCategory(activeCategoryId);
     }
     catch (err) {
@@ -192,7 +195,7 @@ const renderProducts = (products) => {
         container.innerHTML = '<p style="text-align:center;">No products found.</p>';
         return;
     }
-    
+
     const listContainer = document.createElement('div');
     listContainer.className = 'product-list-container';
     container.appendChild(listContainer);
@@ -263,7 +266,7 @@ const filterProducts = () => {
         return;
     }
 
-    filteredProducts = allProducts.filter(p => 
+    filteredProducts = allProducts.filter(p =>
         p.Name.toLowerCase().includes(searchInput)
     );
 
@@ -323,7 +326,7 @@ const handleProductDeletion = async (productId, confirmationContainer) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
     const ok = await checkAdminAccess();
-    if (!ok) return;  
+    if (!ok) return;
 
     await fetchCategories();
     await loadProductsByCategory('all');
@@ -334,7 +337,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // trong list_products.js
 async function checkAdminAccess() {
-    const userId = localStorage.getItem('user_id');
     if (!userId) {
         alert('Bạn cần đăng nhập bằng tài khoản Admin / Store Manager');
         window.location.href = '/';
@@ -352,6 +354,88 @@ async function checkAdminAccess() {
     return true;
 }
 
+const loadCreatePromotionSection = () => {
+    document.getElementById('promotion-form-container')?.remove();
+
+    const formContainer = document.createElement('div');
+    formContainer.id = 'promotion-form-container';
+    formContainer.className = 'update-form';
+
+    formContainer.innerHTML = `
+        <div class="update-form-modal">
+            <h3>New Promotion</h3>
+            <form id="promotion-create-form">
+                
+                <label for="promotion-type">Promotion type:</label>
+                <input type="text" id="promotion-type" name="type" placeholder="E.g: Discount, Voucher" required><br>
+                
+                <label for="promotion-value">Value (in VND):</label>
+                <input type="number" id="promotion-value" name="value"
+                       placeholder=""
+                       min="0" step="0.01" 
+                       max="9999999999.99"  
+                       required><br>
+                
+                <label for="start-period">Start date:</label>
+                <input type="date" id="start-period" name="startDate" required><br>
+
+                <label for="end-period">End date:</label>
+                <input type="date" id="end-period" name="endDate" required><br>
+
+                <button type="submit" id="confirm-promotion-btn">Create</button>
+                <button type="button" id="cancel-promotion-btn">Cancel</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(formContainer);
+
+    document.getElementById('cancel-promotion-btn').addEventListener('click', () => {
+        formContainer.remove();
+    });
+
+    document.getElementById('promotion-create-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        handlePromotionSubmit(formContainer);
+    });
+};
+
+const handlePromotionSubmit = async (formContainer) => {
+    const form = document.getElementById('promotion-create-form')
+
+    const promotionData = {
+        manager_id: userId,
+        type: form.type.value,
+        value: parseFloat(form.value.value),
+        startDate: form.startDate.value,
+        endDate: form.endDate.value,
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/create_promotion`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(promotionData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create a promotion on server.')
+        }
+
+        alert('Promotion created updated successfully!');
+        formContainer.remove();
+    }
+    catch (err) {
+        console.error('Error updating product: ', err);
+        alert(`Update failed: ${err.message}`);
+        formContainer.remove();
+    }
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
     const ok = await checkAdminAccess();
     if (!ok) return;
@@ -361,4 +445,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const searchBtn = document.getElementById('search-product-btn');
     searchBtn.addEventListener('click', filterProducts);
+
+    const newProductBtn = document.getElementById('new-product-btn');
+    newProductBtn.addEventListener('click', () => {
+        window.location.href = './new_product_form.html';
+    })
+
+    const newPromotionBtn = document.getElementById('new-promotion-btn');
+    newPromotionBtn.addEventListener('click', loadCreatePromotionSection)
 });

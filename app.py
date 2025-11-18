@@ -13,7 +13,7 @@ CORS(app)
 
 db_config = {
     'host': 'localhost',
-    'user': 'root',
+    'user': 'user',
     'password': '25082005',
     'database': 'Pharmacy'
 }
@@ -630,6 +630,53 @@ def get_categories():
     except Exception as e:
         print(f"Error fetching categories: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+    
+@app.route('/create_promotion', methods=['POST'])
+def create_promotion():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        data = request.get_json()
+
+        manager_id = data.get('manager_id')
+        type_ = data.get('type')
+        value = float(data.get('value'))
+        start_date_str = data.get('startDate')
+        end_date_str = data.get('endDate')
+
+        if not manager_id or not type_ or value is None or not start_date_str or not end_date_str:
+            return jsonify({'error': 'Missing required fields.'}), 400
+        
+        SQL_FORMAT = '%Y-%m-%d'
+
+        try:
+            start_date = datetime.strptime(start_date_str, SQL_FORMAT)
+            end_date = datetime.strptime(end_date_str, SQL_FORMAT)
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+        
+        query = "CALL sp_CreatePromotion(%s, %s, %s, %s, %s)"
+        cursor.execute(query, (manager_id, type_, value, start_date, end_date))
+        connection.commit()
+        return jsonify({'message': 'Promotion created successfully.'}), 201
+    except Exception as e:
+        print(f"Error creating promotion: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
 
 #########   CART    #########
 
