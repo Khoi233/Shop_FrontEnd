@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán - E-Shop Pharmacy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<header class="header">
+    <div class="header-top">
+        <a href="{{ url_for('index_page') }}" class="logo">
+            <img src="images/logo_e_shop.png" alt="E-Shop Logo">
+        </a>
+        <div class="header-actions">
+            <a href="cart.html" class="action-item">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Giỏ hàng</span>
+            </a>
+            <div id="auth-status" class="action-item">
+                <!-- reuse logic giống cart.html -->
+                <a href="login_register.html" id="login-link" class="action-item">
+                    <i class="fas fa-user"></i>
+                    <span>Đăng nhập</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main-content" style="min-height: 60vh;">
+    <div class="container">
+        <h1>💳 Thanh toán</h1>
+
+        <div class="checkout-layout">
+            <!-- Tóm tắt đơn hàng -->
+            <div class="checkout-summary">
+                <div class="summary-card">
+                    <h3>Tóm tắt đơn hàng</h3>
+                    <div class="summary-row">
+                        <span>Tổng sản phẩm:</span>
+                        <span id="summary-total-items">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tổng tiền:</span>
+                        <span id="summary-total-price" class="price">0 VNĐ</span>
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        * Giá đã bao gồm khuyến mãi (nếu có).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Chọn phương thức thanh toán -->
+            <div class="checkout-payment">
+                <form id="checkout-form">
+                    <h3>Chọn phương thức thanh toán</h3>
+
+                    <div class="payment-method">
+                        <label>
+                            <input type="radio" name="payment_method" value="COD" checked>
+                            <i class="fas fa-truck"></i> Thanh toán khi nhận hàng (COD)
+                        </label>
+                        <p class="desc">Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng.</p>
+                    </div>
+
+                    <div class="payment-method">
+                        <label>
+                            <input type="radio" name="payment_method" value="BANK">
+                            <i class="fas fa-credit-card"></i> Thẻ ngân hàng
+                        </label>
+                        <div class="payment-extra" id="bank-fields" style="display:none;">
+                            <label>Số thẻ:</label>
+                            <input type="text" id="card-number" placeholder="Ví dụ: 4111 1111 1111 1111">
+                            <label>Ngân hàng:</label>
+                            <input type="text" id="bank-name" placeholder="Ví dụ: Vietcombank">
+                        </div>
+                    </div>
+
+                    <div class="payment-method">
+                        <label>
+                            <input type="radio" name="payment_method" value="EWALLET">
+                            <i class="fas fa-wallet"></i> Ví điện tử
+                        </label>
+                        <div class="payment-extra" id="ewallet-fields" style="display:none;">
+                            <label>Số ví:</label>
+                            <input type="text" id="wallet-number" placeholder="Số điện thoại / ID ví">
+                            <label>Loại ví:</label>
+                            <input type="text" id="wallet-provider" placeholder="Momo, ZaloPay, VNPay, ...">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px; width:100%;">
+                        Xác nhận thanh toán
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" style="margin-top: 10px; width:100%;"
+                            onclick="window.location.href='cart.html'">
+                        Quay lại giỏ hàng
+                    </button>
+                </form>
+
+                <div id="checkout-message" style="margin-top: 15px; font-size:0.95em;"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2023 E-Shop Pharmacy. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='checkout.js') }}"></script>
+</body>
+</html>
