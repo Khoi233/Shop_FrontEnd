@@ -7,7 +7,7 @@ This is a web-based Pharmacy Management System built with **Python (Flask)** for
 Before beginning, ensure you have the following installed on your machine:
 
 1.  **Python 3.x**
-2.  **MySQL Server**
+2.  **MySQL WorkBench**
 3.  **Git** (Optional).
 
 ---
