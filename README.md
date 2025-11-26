@@ -16,7 +16,7 @@ Before beginning, ensure you have the following installed on your machine:
 
 ### Step 1: Database Setup
 
-This project heavily relies on MySQL **Stored Procedures**. You must import the database file correctly.
+This project heavily relies on MySQL **Stored Procedures**.
 
 1.  Open your MySQL management tool (MySQL Workbench, phpMyAdmin, HeidiSQL, or DBeaver).
 2.  Create a new database named `Pharmacy`:
@@ -43,7 +43,7 @@ This project heavily relies on MySQL **Stored Procedures**. You must import the 
 
 ### Step 2: Install Python Dependencies
 
-Open your terminal or command prompt in the project root directory.
+Open the terminal or command prompt in the project root directory.
 
 1.  **(Optional but Recommended)** Create a virtual environment:
     ```bash
@@ -81,7 +81,7 @@ Once the database is set up and dependencies are installed:
 
 ## How to Use
 
-Open your web browser and navigate to:
+Open the web browser and navigate to:
 
 *   **Customer Home Page:** [http://127.0.0.1:5001/](http://127.0.0.1:5001/)
 *   **Login / Register:** [http://127.0.0.1:5001/login_register.html](http://127.0.0.1:5001/login_register.html)
